@@ -36,4 +36,6 @@ export const validateLoginUser = [
   body("password")
     .isLength({ min: 6 })
     .withMessage("Password must be atleast 6 character long"),
+
+    validateRequest
 ];

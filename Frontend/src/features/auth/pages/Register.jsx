@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const Register = () => {
   const { handleRegister } = useAuth();
@@ -239,6 +239,8 @@ const Register = () => {
                     </p>
                   </div>
                 </label>
+
+                <a href="/api/auth/google" className="text-sm text-zinc-400 hover:text-amber-400 hover:underline cursor-pointer">Continue with google</a>
               </div>
 
               {/* Submit Button */}
@@ -258,9 +260,9 @@ const Register = () => {
           <div className="mt-8 pt-6 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500">
             <span>
               Already have an account?{" "}
-              <a href="#signin" className="text-amber-400 hover:underline font-medium">
+              <Link to="/login" className="text-amber-400 hover:underline font-medium">
                 Sign In
-              </a>
+              </Link>
             </span>
             <span>&copy; {new Date().getFullYear()} Snitch</span>
           </div>
