@@ -18,12 +18,12 @@ export const validateRegisterUser = [
     .withMessage("Contact must be a 10-digit number"),
   body("password")
     .isLength({ min: 6 })
-    .withMessage("Password must be atleast 6 character long"),
+    .withMessage("Password must be at least 6 characters long"),
   body("fullName")
     .notEmpty()
     .withMessage("Full name is required")
     .isLength({ min: 3 })
-    .withMessage("Full name must be atleast 3 character long"),
+    .withMessage("Full name must be at least 3 characters long"),
   body("isSeller")
      .isBoolean()
      .withMessage("isSeller must be a boolean value"),
@@ -35,7 +35,7 @@ export const validateLoginUser = [
   body("email").isEmail().withMessage("Invalid email formate"),
   body("password")
     .isLength({ min: 6 })
-    .withMessage("Password must be atleast 6 character long"),
+    .withMessage("Password must be at least 6 character long"),
 
     validateRequest
 ];

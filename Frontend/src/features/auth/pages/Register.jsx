@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Link, useNavigate } from "react-router";
+import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
 const Register = () => {
   const { handleRegister } = useAuth();
@@ -253,6 +254,7 @@ const Register = () => {
                   {loading ? "Creating Account..." : "Create Account"}
                 </button>
               </div>
+              <ContinueWithGoogle/>
             </form>
           )}
 
