@@ -240,8 +240,6 @@ const Register = () => {
                     </p>
                   </div>
                 </label>
-
-                <a href="/api/auth/google" className="text-sm text-zinc-400 hover:text-amber-400 hover:underline cursor-pointer">Continue with google</a>
               </div>
 
               {/* Submit Button */}
