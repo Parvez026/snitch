@@ -1,24 +1,20 @@
 import { Router } from "express";
-import {
-  googleCallback,
-  login,
-  register,
-} from "../controllers/auth.controller.js";
-import {
-  validateLoginUser,
-  validateRegisterUser,
-} from "../validator/auth.validator.js";
+import { validateRegisterUser, validateLoginUser } from "../validator/auth.validator.js";
+import { getMe, googleCallback, login, register } from "../controllers/auth.controller.js";
 import passport from "passport";
 import { config } from "../config/config.js";
+
+
 const router = Router();
 
-//POST/api/auth/register
-router.post("/register", validateRegisterUser, register);
 
-//POST/api/auth/login
 
-router.post("/login", validateLoginUser, login);
+router.post('/register', validateRegisterUser, register)
 
+router.post("/login", validateLoginUser, login)
+
+
+// /api/auth/google
 router.get("/google",
     passport.authenticate("google", { scope: [ "profile", "email" ] }))
 
@@ -29,6 +25,13 @@ router.get("/google/callback",
     }),
     googleCallback,
 )
+
+
+/**
+ * @route GET /api/auth/me
+ * @description Get the authenticated user's profile
+ * @access Private
+ */
 
 
 export default router;
