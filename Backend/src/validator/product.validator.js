@@ -10,7 +10,7 @@ const validateRequest = (req, res, next) => {
     });
   }
 
-  return next(); // This was missing!
+  return next(); 
 };
 
 export const productValidator = [
