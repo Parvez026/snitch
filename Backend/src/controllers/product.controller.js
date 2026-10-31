@@ -44,3 +44,4 @@ export async function getSellerProduct(req, res) {
     products,
   });
 }
+

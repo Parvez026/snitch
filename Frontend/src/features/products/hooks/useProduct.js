@@ -15,11 +15,15 @@ const handleCreateProduct=async(formData)=>{
 }
 
 const handleGetSellerProduct=async()=>{
-    const data=await getSellerProduct()
-
-    dispatch(setSellerProduct(data.products))
-    
-    return data.products
+    try {
+        const data=await getSellerProduct()
+        const productList = data?.sellProducts || data?.products || (Array.isArray(data) ? data : [])
+        dispatch(setSellerProduct(productList))
+        return productList
+    } catch (err) {
+        console.error("Failed to fetch seller products:", err)
+        throw err
+    }
 }
 
 return {

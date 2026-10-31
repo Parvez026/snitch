@@ -67,7 +67,7 @@ const CreateProduct = () => {
             data.append('priceCurrency', formData.priceCurrency);
             images.forEach(img => data.append('images', img.file));
             await handleCreateProduct(data);
-            navigate('/');
+            navigate('/seller/dashboard');
         } catch (err) {
             console.error('Failed to create product', err);
         } finally {

@@ -3,6 +3,7 @@ import { validateRegisterUser, validateLoginUser } from "../validator/auth.valid
 import { getMe, googleCallback, login, register } from "../controllers/auth.controller.js";
 import passport from "passport";
 import { config } from "../config/config.js";
+import { authenticateUser } from "../middleware/auth.middleware.js";
 
 
 const router = Router();
@@ -15,6 +16,7 @@ router.post("/login", validateLoginUser, login)
 
 
 // /api/auth/google
+
 router.get("/google",
     passport.authenticate("google", { scope: [ "profile", "email" ] }))
 
@@ -32,6 +34,10 @@ router.get("/google/callback",
  * @description Get the authenticated user's profile
  * @access Private
  */
+
+router.get("/get-me",authenticateUser,getMe)
+
+
 
 
 export default router;
