@@ -4,11 +4,11 @@ import React from 'react';
 const ContinueWithGoogle = ({
     href = '/api/auth/google',
     onClick,
-    theme = 'dark',
+    theme = 'white',
     text = 'Continue with Google',
     shape = 'rounded',
-    showDivider = true,
-    dividerText = 'or',
+    showDivider = false,
+    dividerText = 'or continue with',
     disabled = false,
     className = '',
 }) => {
@@ -28,25 +28,25 @@ const ContinueWithGoogle = ({
         },
         light: {
             backgroundColor: '#FFFFFF',
-            borderColor: '#747775',
+            borderColor: '#E7E5E4',
             color: '#1F1F1F',
         },
         white: {
             backgroundColor: '#FFFFFF',
-            borderColor: '#E3E3E3',
-            color: '#1F1F1F',
+            borderColor: '#E7E5E4',
+            color: '#1C1917',
         },
     }[theme] || {
-        backgroundColor: '#131314',
-        borderColor: '#8E918F',
-        color: '#E3E3E3',
+        backgroundColor: '#FFFFFF',
+        borderColor: '#E7E5E4',
+        color: '#1C1917',
     };
 
     const themeHoverClasses = {
         dark: 'hover:bg-[#202124] hover:border-[#9AA0A6] active:bg-[#2A2B2D]',
-        light: 'hover:bg-[#F8F9FA] hover:border-[#5F6368] active:bg-[#EEEEEE] shadow-sm hover:shadow',
-        white: 'hover:bg-[#F8F9FA] hover:border-[#DADCE0] active:bg-[#F1F3F4] shadow-sm hover:shadow',
-    }[theme] || 'hover:bg-[#202124] hover:border-[#9AA0A6] active:bg-[#2A2B2D]';
+        light: 'hover:bg-[#F8F9FA] hover:border-stone-400 active:bg-[#EEEEEE] shadow-sm hover:shadow',
+        white: 'hover:bg-[#F8F9FA] hover:border-stone-400 active:bg-[#F1F3F4] shadow-sm hover:shadow',
+    }[theme] || 'hover:bg-[#F8F9FA] hover:border-stone-400 active:bg-[#F1F3F4] shadow-sm hover:shadow';
 
     // Base font styling conforming to Google Guidelines: Roboto Medium, 14px, 0.25px letter spacing
     const fontStyle = {
@@ -60,7 +60,7 @@ const ContinueWithGoogle = ({
     const buttonClasses = `
     group relative flex items-center justify-center w-full h-12 px-4
     border transition-all duration-200 select-none
-    focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4285F4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0c10]
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAFAF8]
     ${shapeClasses}
     ${themeHoverClasses}
     ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}
@@ -111,8 +111,8 @@ const ContinueWithGoogle = ({
         <div className="w-full">
             {showDivider && (
                 <div className="relative my-4 flex items-center justify-center">
-                    <div className="w-full border-t border-zinc-800" />
-                    <span className="absolute bg-[#14161f] px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 select-none">
+                    <div className="w-full border-t border-stone-200" />
+                    <span className="absolute bg-[#FAFAF8] px-3 text-[11px] font-medium uppercase tracking-wider text-stone-400 select-none">
                         {dividerText}
                     </span>
                 </div>
