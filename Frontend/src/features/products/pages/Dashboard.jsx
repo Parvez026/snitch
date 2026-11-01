@@ -17,14 +17,6 @@ const formatPrice = (price) => {
   return `${sym}${formattedAmount}`;
 };
 
-/* ─── Copy to Clipboard Helper ────────────────────────────────────────── */
-const copyText = (text, setCopied) => {
-  if (navigator?.clipboard?.writeText) {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-};
 
 /* ─── Product Card with Multi-Image Preview ────────────────────────────── */
 const ProductCard = ({ product, onQuickView }) => {
@@ -135,36 +127,6 @@ const ProductCard = ({ product, onQuickView }) => {
           </p>
         </div>
 
-        {/* Footer Meta Strip */}
-        <div className="mt-4 pt-3.5 border-t border-stone-100 flex items-center justify-between text-xs text-stone-400">
-          {/* Product ID Copy */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              copyText(product._id, setCopied);
-            }}
-            className="group/id flex items-center gap-1 hover:text-stone-700 transition text-[11px] font-mono"
-            title="Click to copy MongoDB Product ID"
-          >
-            <span className="text-stone-300">#</span>
-            <span>{product._id ? product._id.slice(-6) : 'N/A'}</span>
-            <svg className="w-3 h-3 text-stone-300 group-hover/id:text-stone-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-            {copied && (
-              <span className="text-[10px] text-emerald-600 font-sans font-medium">Copied!</span>
-            )}
-          </button>
-
-          {/* Quick Inspect Trigger */}
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-700 group-hover:underline underline-offset-2">
-            Inspect
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </span>
-        </div>
       </div>
     </div>
   );
@@ -172,7 +134,6 @@ const ProductCard = ({ product, onQuickView }) => {
 
 /* ─── Detailed Table/List View Row ─────────────────────────────────────── */
 const ProductTableRow = ({ product, onQuickView }) => {
-  const [copied, setCopied] = useState(false);
   const images = Array.isArray(product?.images) && product.images.length > 0 ? product.images : [];
   const thumbnail = images[0]?.url || '/placeholder-image.jpg';
 
@@ -214,23 +175,6 @@ const ProductTableRow = ({ product, onQuickView }) => {
         </span>
       </td>
 
-      <td className="py-4 px-3 hidden lg:table-cell whitespace-nowrap">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            copyText(product._id, setCopied);
-          }}
-          className="font-mono text-xs text-stone-400 hover:text-stone-700 flex items-center gap-1"
-        >
-          <span>{product._id ? product._id.slice(0, 10) + '...' : '—'}</span>
-          <svg className="w-3 h-3 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-          {copied && <span className="text-[10px] text-emerald-600 font-sans">Copied</span>}
-        </button>
-      </td>
-
       <td className="py-4 pr-4 sm:pr-6 pl-3 text-right whitespace-nowrap">
         <button
           type="button"
@@ -250,7 +194,6 @@ const ProductTableRow = ({ product, onQuickView }) => {
 /* ─── Full Luxury Quick-View Modal / Inspector ─────────────────────────── */
 const QuickViewModal = ({ product, onClose }) => {
   const [selectedImg, setSelectedImg] = useState(0);
-  const [copiedId, setCopiedId] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -372,25 +315,6 @@ const QuickViewModal = ({ product, onClose }) => {
                 <span className="font-semibold text-stone-800">
                   {images.length} High-Res Shots
                 </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white border border-stone-200 col-span-2">
-                <span className="text-[9px] uppercase tracking-widest text-stone-400 font-bold block mb-1">
-                  Seller Mongo ID
-                </span>
-                <div className="flex items-center justify-between font-mono text-[11px] text-stone-600">
-                  <span className="truncate pr-2">{product.seller || 'N/A'}</span>
-                  <button
-                    onClick={() => copyText(product.seller, setCopiedId)}
-                    className="hover:text-stone-900 transition flex-shrink-0"
-                  >
-                    {copiedId ? (
-                      <span className="text-emerald-600 font-sans font-medium text-[10px]">Copied</span>
-                    ) : (
-                      'Copy'
-                    )}
-                  </button>
-                </div>
               </div>
             </div>
           </div>
