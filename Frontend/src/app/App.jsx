@@ -4,6 +4,7 @@ import { Router } from "./app.routes.jsx";
 import { useEffect } from "react";
 import { useAuth } from "../features/auth/hooks/useAuth.js";
 import { useSelector } from "react-redux";
+import Footer from "../features/shared/components/Footer.jsx";
 
 
 function App() {
@@ -19,6 +20,7 @@ handleGetMe()
   return (
     <>
        <RouterProvider router={Router}/>
+    <Footer/>
     </>
   )
 }

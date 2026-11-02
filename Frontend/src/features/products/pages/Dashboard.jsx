@@ -17,15 +17,12 @@ const formatPrice = (price) => {
   return `${sym}${formattedAmount}`;
 };
 
-
 /* ─── Product Card with Multi-Image Preview ────────────────────────────── */
 const ProductCard = ({ product, onQuickView }) => {
   const [activeImgIndex, setActiveImgIndex] = useState(0);
-  const [copied, setCopied] = useState(false);
 
   const images = Array.isArray(product?.images) && product.images.length > 0
-    ? product.images
-    : [{ url: '/placeholder-image.jpg', _id: 'default' }];
+    ? product.images: [{ url: '/placeholder-image.jpg', _id: 'default' }];
 
   const currentImage = images[activeImgIndex]?.url || images[0]?.url;
 
@@ -132,66 +129,7 @@ const ProductCard = ({ product, onQuickView }) => {
   );
 };
 
-/* ─── Detailed Table/List View Row ─────────────────────────────────────── */
-const ProductTableRow = ({ product, onQuickView }) => {
-  const images = Array.isArray(product?.images) && product.images.length > 0 ? product.images : [];
-  const thumbnail = images[0]?.url || '/placeholder-image.jpg';
-
-  return (
-    <tr
-      onClick={() => onQuickView(product)}
-      className="group border-b border-stone-100 hover:bg-stone-50/70 transition-colors cursor-pointer"
-    >
-      <td className="py-4 pl-4 sm:pl-6 pr-3">
-        <div className="flex items-center gap-3.5">
-          <div className="relative w-12 h-14 rounded-lg bg-stone-100 overflow-hidden flex-shrink-0 border border-stone-200">
-            <img src={thumbnail} alt={product.title} className="w-full h-full object-cover" />
-            {images.length > 1 && (
-              <span className="absolute bottom-0.5 right-0.5 px-1 rounded bg-stone-900/80 text-[8px] font-bold text-white">
-                +{images.length - 1}
-              </span>
-            )}
-          </div>
-          <div>
-            <h4 className="font-syne font-bold text-sm text-stone-900 group-hover:text-stone-700 transition">
-              {product.title || 'Untitled'}
-            </h4>
-            <p className="text-xs text-stone-400 line-clamp-1 max-w-xs sm:max-w-md">
-              {product.description || 'No description'}
-            </p>
-          </div>
-        </div>
-      </td>
-
-      <td className="py-4 px-3 whitespace-nowrap">
-        <span className="font-syne font-bold text-sm text-stone-900">
-          {formatPrice(product.price)}
-        </span>
-      </td>
-
-      <td className="py-4 px-3 hidden md:table-cell whitespace-nowrap">
-        <span className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 text-xs font-medium">
-          {images.length} {images.length === 1 ? 'image' : 'images'}
-        </span>
-      </td>
-
-      <td className="py-4 pr-4 sm:pr-6 pl-3 text-right whitespace-nowrap">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onQuickView(product);
-          }}
-          className="text-xs font-semibold text-stone-700 hover:text-stone-900 px-3 py-1.5 rounded-lg border border-stone-200 hover:border-stone-300 bg-white transition"
-        >
-          View Details
-        </button>
-      </td>
-    </tr>
-  );
-};
-
-/* ─── Full Luxury Quick-View Modal / Inspector ─────────────────────────── */
+/* ─── Detailed Quick-View Modal / Inspector ─────────────────────────── */
 const QuickViewModal = ({ product, onClose }) => {
   const [selectedImg, setSelectedImg] = useState(0);
 
@@ -262,20 +200,14 @@ const QuickViewModal = ({ product, onClose }) => {
 
         {/* Right Side: Product Details & Specs */}
         <div className="w-full lg:w-1/2 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto">
+         
           <div>
-            <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-2.5 py-0.5 rounded-full bg-stone-200 text-stone-700">
                 Snitch Atelier
               </span>
-              <span className="text-[10px] uppercase tracking-wider text-stone-400 font-semibold">
-                ID: {product._id?.slice(-8)}
-              </span>
-            </div>
-
             <h2 className="font-syne text-2xl sm:text-3xl font-extrabold text-stone-900">
               {product.title}
             </h2>
-
             {/* Price tag */}
             <div className="mt-3 flex items-baseline gap-2">
               <span className="font-syne text-3xl font-bold text-stone-950">
@@ -437,20 +369,7 @@ const Dashboard = () => {
               </span>
             </div>
           </div>
-
-          {/* Right Action Cluster */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Refresh Catalog Button */}
-            <button
-              onClick={() => handleGetSellerProduct()}
-              title="Refresh Catalog"
-              className="p-2.5 rounded-xl border border-stone-200 hover:border-stone-300 bg-white text-stone-600 hover:text-stone-900 transition shadow-sm active:scale-95"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
-
+          
             {/* Create Product Button */}
             <button
               onClick={() => navigate('/seller/create-product')}
@@ -461,7 +380,6 @@ const Dashboard = () => {
               </svg>
               <span>Add Product</span>
             </button>
-          </div>
         </div>
       </header>
 
@@ -589,39 +507,6 @@ const Dashboard = () => {
               <option value="price-desc">Price: High to Low</option>
               <option value="title-asc">Title: A to Z</option>
             </select>
-
-            {/* View Mode Toggle (Grid vs Table) */}
-            <div className="flex items-center bg-stone-100 p-0.5 rounded-xl border border-stone-200">
-              <button
-                type="button"
-                onClick={() => setViewMode('grid')}
-                title="Grid Lookbook View"
-                className={`p-2 rounded-lg transition ${
-                  viewMode === 'grid'
-                    ? 'bg-white text-stone-900 shadow-xs'
-                    : 'text-stone-400 hover:text-stone-700'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setViewMode('table')}
-                title="Table Inventory View"
-                className={`p-2 rounded-lg transition ${
-                  viewMode === 'table'
-                    ? 'bg-white text-stone-900 shadow-xs'
-                    : 'text-stone-400 hover:text-stone-700'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
           </div>
         </div>
 

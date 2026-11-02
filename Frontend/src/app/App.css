@@ -32,3 +32,25 @@
 .amber-bloom-lg {
   box-shadow: 0 8px 40px rgba(245, 158, 11, 0.35);
 }
+
+
+
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #faf9f7;
+  font-family: Arial, Helvetica, sans-serif;
+}
