@@ -4,6 +4,7 @@ import { useProduct } from "../hooks/useProduct";
 import { useSelector } from "react-redux";
 import {Search,ShoppingBag,UserRound,Heart,ChevronLeft,ChevronRight,ArrowUpRight,Star,Menu,X,} from "lucide-react";
 import Nav from "../../shared/components/Nav";
+import { useNavigate } from "react-router";
 
 const categories = [
   "All",
@@ -175,6 +176,8 @@ const Home = () => {
   const [cartCount, setCartCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const navigate=useNavigate()
+
   useEffect(() => {
     handleGetAllProducts();
   }, []);
@@ -289,6 +292,7 @@ const Home = () => {
 
             {filteredProducts.map((product) => (
               <ProductCard
+                onClick={()=>navigate(`/product/${product._id}`)}
                 key={product._id}
                 product={product}
                 onAddToCart={handleAddToCart}
