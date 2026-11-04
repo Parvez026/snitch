@@ -16,7 +16,7 @@ const categories = [
   "Casual",
 ];
 
-const ProductCard = ({ product, onAddToCart }) => {
+const ProductCard = ({ product, onAddToCart,navigate }) => {
   const [activeImage, setActiveImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
@@ -32,10 +32,13 @@ const ProductCard = ({ product, onAddToCart }) => {
 
   return (
     <article className="group">
-      <div className="relative overflow-hidden rounded-2xl bg-[#f2efec]">
+      <div 
+      className="relative overflow-hidden rounded-2xl bg-[#f2efec]">
 
         {/* Main Image */}
-        <div className="aspect-[3/4] overflow-hidden">
+        <div
+         onClick={()=>navigate(`/product/${product._id}`)}
+         className="aspect-[3/4] overflow-hidden">
           {images[activeImage]?.url ? (
             <img
               src={images[activeImage].url}
@@ -120,26 +123,24 @@ const ProductCard = ({ product, onAddToCart }) => {
       <div className="px-1 pt-4">
 
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <h3 className="text-sm font-semibold tracking-wide text-[#171717] md:text-base">
+    <div>
+        <div className="flex items-center gap-40">
+           <h3 className="text-sm font-semibold tracking-wide text-[#171717] md:text-base">
               {product.title}
             </h3>
+            <p className="text-base font-bold text-black md:text-lg">
+            {product.price?.currency === "INR" ? "₹" : ""}
+            {product.price?.amount}
+          </p>
+            </div>
 
             <p className="mt-1 text-xs text-gray-500 md:text-sm">
               {product.description}
             </p>
           </div>
-
-          <div className="flex items-center gap-1 text-xs text-gray-500">
-            <Star
-              size={13}
-              className="fill-amber-400 text-amber-400"
-            />
-            4.8
-          </div>
         </div>
 
-        <div className="mt-3 flex items-center justify-between">
+        {/* <div className="mt-3 flex items-center justify-between">
           <p className="text-base font-bold text-black md:text-lg">
             {product.price?.currency === "INR" ? "₹" : ""}
             {product.price?.amount}
@@ -148,7 +149,7 @@ const ProductCard = ({ product, onAddToCart }) => {
           <span className="text-[10px] uppercase tracking-wider text-gray-400">
             {images.length} Views
           </span>
-        </div>
+        </div> */}
 
         {/* Add To Cart */}
         <button
@@ -226,7 +227,7 @@ const Home = () => {
       {/* Products Section */}
       <section
         id="products"
-        className="mx-auto max-w-[1500px] px-5 py-12 md:px-10 md:py-16"
+        className="mx-auto max-w-[1500px] px-5 py-12 md:px-10 md:py-5"
       >
 
         {/* Header */}
@@ -288,11 +289,11 @@ const Home = () => {
 
         {/* Product Grid */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-2 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-2 md:grid-cols-3 md:gap-x-6 lg:grid-cols-5">
 
             {filteredProducts.map((product) => (
               <ProductCard
-                onClick={()=>navigate(`/product/${product._id}`)}
+                navigate={navigate}
                 key={product._id}
                 product={product}
                 onAddToCart={handleAddToCart}
