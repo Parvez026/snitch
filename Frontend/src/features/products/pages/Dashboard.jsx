@@ -18,7 +18,7 @@ const formatPrice = (price) => {
 };
 
 /* ─── Product Card with Multi-Image Preview ────────────────────────────── */
-const ProductCard = ({ product, onQuickView }) => {
+const ProductCard = ({ product, onQuickView,navigate }) => {
   const [activeImgIndex, setActiveImgIndex] = useState(0);
 
   const images = Array.isArray(product?.images) && product.images.length > 0
@@ -38,11 +38,12 @@ const ProductCard = ({ product, onQuickView }) => {
 
   return (
     <div
-      onClick={() => onQuickView(product)}
+      onClick={() => navigate(`/seller/product/${product._id}`)}
       className="group relative flex flex-col bg-white rounded-2xl border border-stone-200/80 overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] hover:border-stone-300 transition-all duration-300 cursor-pointer"
     >
       {/* ── Top Media Area ── */}
-      <div className="relative aspect-[4/5] bg-stone-100 overflow-hidden select-none">
+      <div 
+      className="relative aspect-[4/5] bg-stone-100 overflow-hidden select-none">
         <img
           src={currentImage}
           alt={product.title}
@@ -114,7 +115,7 @@ const ProductCard = ({ product, onQuickView }) => {
             <h3 className="font-syne font-bold text-base sm:text-lg text-stone-900 leading-snug line-clamp-1 group-hover:text-stone-700 transition">
               {product.title || 'Untitled Design'}
             </h3>
-            <span className="font-syne font-extrabold text-base sm:text-lg text-stone-950 whitespace-nowrap">
+            <span className=" font-extrabold text-base sm:text-lg text-stone-950 whitespace-nowrap">
               {formatPrice(product.price)}
             </span>
           </div>
@@ -276,7 +277,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // newest, price-asc, price-desc, title-asc
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
   const [inspectingProduct, setInspectingProduct] = useState(null);
 
   // Safely extract products array from whatever structure is stored
@@ -418,7 +418,7 @@ const Dashboard = () => {
             <span className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block mb-1">
               Total Pieces
             </span>
-            <div className="font-syne text-2xl sm:text-3xl font-extrabold text-stone-900">
+            <div className=" text-2xl sm:text-3xl font-extrabold text-stone-900">
               {metrics.totalCount}
             </div>
             <span className="text-[11px] text-stone-500 mt-1 block">
@@ -431,7 +431,7 @@ const Dashboard = () => {
             <span className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block mb-1">
               Catalog Value
             </span>
-            <div className="font-syne text-2xl sm:text-3xl font-extrabold text-stone-900">
+            <div className=" text-2xl sm:text-3xl font-extrabold text-stone-900">
               {formatPrice({ amount: metrics.totalValuation, currency: metrics.currency })}
             </div>
             <span className="text-[11px] text-stone-500 mt-1 block">
@@ -444,7 +444,7 @@ const Dashboard = () => {
             <span className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block mb-1">
               Avg. Ticket
             </span>
-            <div className="font-syne text-2xl sm:text-3xl font-extrabold text-stone-900">
+            <div className=" text-2xl sm:text-3xl font-extrabold text-stone-900">
               {formatPrice({ amount: metrics.avgValuation, currency: metrics.currency })}
             </div>
             <span className="text-[11px] text-stone-500 mt-1 block">
@@ -457,7 +457,7 @@ const Dashboard = () => {
             <span className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block mb-1">
               Editorial Media
             </span>
-            <div className="font-syne text-2xl sm:text-3xl font-extrabold text-stone-900">
+            <div className=" text-2xl sm:text-3xl font-extrabold text-stone-900">
               {metrics.totalPhotos}
             </div>
             <span className="text-[11px] text-stone-500 mt-1 block">
@@ -511,100 +511,95 @@ const Dashboard = () => {
         </div>
 
         {/* ── Products Display Area ─────────────────────────────────── */}
-        <div className="mt-8">
-          {loading ? (
-            /* Loading Skeletons */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="rounded-2xl bg-white border border-stone-200 p-4 animate-pulse">
-                  <div className="aspect-[4/5] bg-stone-100 rounded-xl mb-4" />
-                  <div className="h-4 bg-stone-100 rounded w-2/3 mb-2" />
-                  <div className="h-3 bg-stone-100 rounded w-full mb-3" />
-                  <div className="h-4 bg-stone-100 rounded w-1/3" />
-                </div>
-              ))}
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            /* Empty State */
-            <div className="py-20 px-6 rounded-3xl bg-white border border-stone-200 text-center max-w-xl mx-auto shadow-sm">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-400 mb-4">
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-
-              {searchQuery ? (
-                <>
-                  <h3 className="font-syne font-bold text-lg text-stone-900">
-                    No results for &ldquo;{searchQuery}&rdquo;
-                  </h3>
-                  <p className="text-xs text-stone-500 mt-1">
-                    Try checking for typos or clear your search query to see all listed items.
-                  </p>
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="mt-5 px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-xs font-semibold text-stone-800 transition"
-                  >
-                    Clear Filter
-                  </button>
-                </>
-              ) : (
-                <>
-                  <h3 className="font-syne font-bold text-lg text-stone-900">
-                    No Products in Catalog
-                  </h3>
-                  <p className="text-xs text-stone-500 mt-1.5 leading-relaxed">
-                    You haven&apos;t published any menswear items yet. Start by creating your first product with lookbook images and pricing.
-                  </p>
-                  <button
-                    onClick={() => navigate('/seller/create-product')}
-                    className="mt-6 px-6 h-11 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-syne font-bold text-xs uppercase tracking-wider transition shadow-sm"
-                  >
-                    + Create Your First Design
-                  </button>
-                </>
-              )}
-            </div>
-          ) : viewMode === 'grid' ? (
-            /* Grid View */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  onQuickView={(p) => setInspectingProduct(p)}
-                />
-              ))}
-            </div>
-          ) : (
-            /* Table View */
-            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-stone-50/80 border-b border-stone-200 text-[10px] uppercase tracking-wider text-stone-400 font-bold">
-                      <th className="py-3.5 pl-4 sm:pl-6 pr-3">Product</th>
-                      <th className="py-3.5 px-3">Price</th>
-                      <th className="py-3.5 px-3 hidden md:table-cell">Gallery</th>
-                      <th className="py-3.5 px-3 hidden lg:table-cell">Product ID</th>
-                      <th className="py-3.5 pr-4 sm:pr-6 pl-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProducts.map((product) => (
-                      <ProductTableRow
-                        key={product._id}
-                        product={product}
-                        onQuickView={(p) => setInspectingProduct(p)}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+     <div className="mt-8">
+  {loading ? (
+    /* Loading Skeletons */
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {[1, 2, 3, 4].map((n) => (
+        <div
+          key={n}
+          className="rounded-2xl bg-white border border-stone-200 p-4 animate-pulse"
+        >
+          <div className="aspect-[4/5] bg-stone-100 rounded-xl mb-4" />
+          <div className="h-4 bg-stone-100 rounded w-2/3 mb-2" />
+          <div className="h-3 bg-stone-100 rounded w-full mb-3" />
+          <div className="h-4 bg-stone-100 rounded w-1/3" />
         </div>
-      </main>
+      ))}
+    </div>
+  ) : filteredProducts.length === 0 ? (
+    /* Empty State */
+    <div className="py-20 px-6 rounded-3xl bg-white border border-stone-200 text-center max-w-xl mx-auto shadow-sm">
+      <div className="w-16 h-16 mx-auto rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-400 mb-4">
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+          />
+        </svg>
+      </div>
+
+      {searchQuery ? (
+        <>
+          <h3 className="font-syne font-bold text-lg text-stone-900">
+            No results for &ldquo;{searchQuery}&rdquo;
+          </h3>
+
+          <p className="text-xs text-stone-500 mt-1">
+            Try checking for typos or clear your search query to see all listed
+            items.
+          </p>
+
+          <button
+            onClick={() => setSearchQuery("")}
+            className="mt-5 px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-xs font-semibold text-stone-800 transition"
+          >
+            Clear Filter
+          </button>
+        </>
+      ) : (
+        <>
+          <h3 className="font-syne font-bold text-lg text-stone-900">
+            No Products in Catalog
+          </h3>
+
+          <p className="text-xs text-stone-500 mt-1.5 leading-relaxed">
+            You haven&apos;t published any menswear items yet. Start by creating
+            your first product with lookbook images and pricing.
+          </p>
+
+          <button
+            onClick={() => navigate("/seller/create-product")}
+            className="mt-6 px-6 h-11 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-syne font-bold text-xs uppercase tracking-wider transition shadow-sm"
+          >
+            + Create Your First Design
+          </button>
+        </>
+      )}
+    </div>
+  ) : (
+    /* Grid View */
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {filteredProducts.map((product) => (
+        <ProductCard
+          key={product._id}
+          product={product}
+        //   onQuickView={(p) => setInspectingProduct(p)}
+        // onClick={()=>navigate(`/seller/products/${product._id}`)}
+        navigate={navigate}
+        />
+      ))}
+      </div>
+     )}
+      </div>
+ </main>
 
       {/* ── Quick View Modal ────────────────────────────────────────── */}
       {inspectingProduct && (

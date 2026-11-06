@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
 import { useSelector } from "react-redux";
-import {Search,ShoppingBag,UserRound,Heart,ChevronLeft,ChevronRight,ArrowUpRight,Star,Menu,X,} from "lucide-react";
+import {Search,ShoppingBag,Heart,ChevronLeft,ChevronRight} from "lucide-react";
 import Nav from "../../shared/components/Nav";
 import { useNavigate } from "react-router";
 
@@ -31,73 +31,78 @@ const ProductCard = ({ product, onAddToCart,navigate }) => {
   };
 
   return (
-    <article className="group">
-      <div 
-      className="relative overflow-hidden rounded-2xl bg-[#f2efec]">
+ <article className="group h-full">
+  <div className="overflow-hidden rounded-2xl border border-[#e5ddd3] bg-[#fbf9f6] p-2.5 transition-all duration-300 hover:border-[#c9b8a5]">
 
-        {/* Main Image */}
-        <div
-         onClick={()=>navigate(`/product/${product._id}`)}
-         className="aspect-[3/4] overflow-hidden">
-          {images[activeImage]?.url ? (
-            <img
-              src={images[activeImage].url}
-              alt={product.title}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-gray-400">
-              No Image
-            </div>
-          )}
-        </div>
+    {/* Image Section */}
+    <div className="relative overflow-hidden rounded-xl bg-[#f2efec]">
 
-        {/* New Badge */}
-        <div className="absolute left-3 top-3 rounded-full bg-black px-3 py-1.5 text-[10px] font-semibold tracking-wider text-white">
-          NEW
-        </div>
-
-        {/* Wishlist */}
-        <button
-          onClick={() => setIsWishlisted(!isWishlisted)}
-          aria-label="Add to wishlist"
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur transition hover:scale-110"
-        >
-          <Heart
-            size={17}
-            className={
-              isWishlisted
-                ? "fill-red-500 text-red-500"
-                : "text-black"
-            }
+      {/* Main Image */}
+      <div
+        onClick={() => navigate(`/product/${product._id}`)}
+        className="aspect-[3/4] cursor-pointer overflow-hidden"
+      >
+        {images[activeImage]?.url ? (
+          <img
+            src={images[activeImage].url}
+            alt={product.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           />
-        </button>
-
-        {/* Previous Image */}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={() => changeImage(-1)}
-              aria-label="Previous image"
-              className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white opacity-0 backdrop-blur transition-all hover:bg-black group-hover:opacity-100"
-            >
-              <ChevronLeft size={20} />
-            </button>
-
-            {/* Next Image */}
-            <button
-              onClick={() => changeImage(1)}
-              aria-label="Next image"
-              className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white opacity-0 backdrop-blur transition-all hover:bg-black group-hover:opacity-100"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </>
+        ) : (
+          <div className="flex h-full items-center justify-center text-sm text-gray-400">
+            No Image Available
+          </div>
         )}
+      </div>
 
-        {/* All 7 Image Thumbnails */}
-        <div className="absolute bottom-3 left-3 right-3 flex gap-1.5 overflow-x-auto scrollbar-hide">
+      {/* Image Count */}
+      {images.length > 1 && (
+        <div className="absolute left-3 top-3 rounded-full bg-black/60 px-3 py-1.5 text-[11px] text-white backdrop-blur">
+          {activeImage + 1} / {images.length}
+        </div>
+      )}
+
+      {/* Wishlist */}
+      <button
+        onClick={() => setIsWishlisted(!isWishlisted)}
+        aria-label="Add to wishlist"
+        className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:scale-110"
+      >
+        <Heart
+          size={18}
+          className={
+            isWishlisted
+              ? "fill-red-500 text-red-500"
+              : "text-[#171717]"
+          }
+        />
+      </button>
+
+      {/* Image Navigation */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={() => changeImage(-1)}
+            aria-label="Previous image"
+            className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black opacity-0 transition-all hover:bg-white group-hover:opacity-100"
+          >
+            <ChevronLeft size={20} />
+          </button>
+
+          <button
+            onClick={() => changeImage(1)}
+            aria-label="Next image"
+            className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black opacity-0 transition-all hover:bg-white group-hover:opacity-100"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </>
+      )}
+
+      {/* Image Thumbnails */}
+      {images.length > 1 && (
+        <div className="absolute bottom-3 left-3 right-3 flex gap-2 overflow-x-auto scrollbar-hide">
           {images.map((image, index) => (
             <button
               key={image._id || index}
@@ -105,8 +110,8 @@ const ProductCard = ({ product, onAddToCart,navigate }) => {
               aria-label={`View image ${index + 1}`}
               className={`h-11 w-11 shrink-0 overflow-hidden rounded-lg border-2 bg-white transition-all ${
                 activeImage === index
-                  ? "border-black scale-105"
-                  : "border-white/80 opacity-80 hover:opacity-100"
+                  ? "scale-105 border-white shadow-md"
+                  : "border-white/60 opacity-75 hover:opacity-100"
               }`}
             >
               <img
@@ -117,50 +122,43 @@ const ProductCard = ({ product, onAddToCart,navigate }) => {
             </button>
           ))}
         </div>
-      </div>
+      )}
+    </div>
 
-      {/* Product Information */}
-      <div className="px-1 pt-4">
+    {/* Product Details — inside the same card */}
+    <div className="px-2 pt-4">
 
-        <div className="flex items-start justify-between gap-2">
-    <div>
-        <div className="flex items-center gap-40">
-           <h3 className="text-sm font-semibold tracking-wide text-[#171717] md:text-base">
-              {product.title}
-            </h3>
-            <p className="text-base font-bold text-black md:text-lg">
-            {product.price?.currency === "INR" ? "₹" : ""}
-            {product.price?.amount}
-          </p>
-            </div>
-
-            <p className="mt-1 text-xs text-gray-500 md:text-sm">
-              {product.description}
-            </p>
-          </div>
-        </div>
-
-        {/* <div className="mt-3 flex items-center justify-between">
-          <p className="text-base font-bold text-black md:text-lg">
-            {product.price?.currency === "INR" ? "₹" : ""}
-            {product.price?.amount}
-          </p>
-
-          <span className="text-[10px] uppercase tracking-wider text-gray-400">
-            {images.length} Views
-          </span>
-        </div> */}
-
-        {/* Add To Cart */}
-        <button
-          onClick={() => onAddToCart(product)}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-black py-3.5 text-xs font-medium text-white transition duration-300 hover:bg-[#333] active:scale-[0.98] md:text-sm"
+      {/* Title and Price */}
+      <div className="flex items-start justify-between gap-3">
+        <h3
+          onClick={() => navigate(`/product/${product._id}`)}
+          className="cursor-pointer text-sm font-medium leading-5 text-[#171717] hover:text-gray-500 md:text-base"
         >
-          <ShoppingBag size={16} />
-          Add to Cart
-        </button>
+          {product.title}
+        </h3>
+
+        <p className="shrink-0 text-sm font-semibold text-[#171717] md:text-base">
+          {product.price?.currency === "INR" ? "₹" : ""}
+          {product.price?.amount?.toLocaleString("en-IN")}
+        </p>
       </div>
-    </article>
+
+      {/* Description */}
+      <p className="mt-2 line-clamp-2 min-h-10 text-xs leading-5 text-[#82776d] md:text-sm">
+        {product.description || "Discover the details of this piece."}
+      </p>
+
+      {/* Add To Cart */}
+      <button
+        onClick={() => onAddToCart(product)}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#171717] py-3.5 text-xs font-medium tracking-wide text-white transition-all duration-300 hover:bg-[#333] active:scale-[0.98] md:text-sm"
+      >
+        <ShoppingBag size={16} />
+        Add to Cart
+      </button>
+    </div>
+  </div>
+</article>
   );
 };
 
