@@ -8,5 +8,6 @@ const router=express.Router()
 
 router.post("/add/:productId/:variantId",authenticateUser,cartValidator,addToCart)
 
+router.get("/",authenticateUser)
 
 export default router

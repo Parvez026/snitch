@@ -44,7 +44,7 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    await cartModel.findByIdAndUpdate(
+    await cartModel.findOneAndUpdate(
       {
         user: req.user._id,
         "items.product": productId,
@@ -81,3 +81,4 @@ export const addToCart = async (req, res) => {
     success: true,
   });
 };
+

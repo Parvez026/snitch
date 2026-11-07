@@ -149,13 +149,13 @@ const ProductCard = ({ product, onAddToCart,navigate }) => {
       </p>
 
       {/* Add To Cart */}
-      <button
+      {/* <button
         onClick={() => onAddToCart(product)}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#171717] py-3.5 text-xs font-medium tracking-wide text-white transition-all duration-300 hover:bg-[#333] active:scale-[0.98] md:text-sm"
       >
         <ShoppingBag size={16} />
         Add to Cart
-      </button>
+      </button> */}
     </div>
   </div>
 </article>
