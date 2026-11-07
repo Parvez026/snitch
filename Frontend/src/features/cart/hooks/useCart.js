@@ -27,9 +27,9 @@ export const useCart = () => {
   }
 
   async function handleIncrementCartItem({ productId, variantId }) {
-        await incrementCartItemQuantity({ productId, variantId })
-        dispatch(incrementCartItems({ productId, variantId }))
-    }
+    await incrementCartItemQuantity({ productId, variantId })
+    dispatch(incrementCartItems({ productId, variantId }))
+  }
 
   async function handleDecrementCartItem({ productId, variantId, currentQty }) {
     if (currentQty <= 1) return

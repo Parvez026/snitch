@@ -149,7 +149,6 @@ export const incrementCartItemQuantity=async(req,res)=>{
 
 }
 
-
 export const decrementCartItemQuantity=async(req,res)=>{
     const{productId,variantId}=req.params
 
@@ -194,4 +193,20 @@ export const decrementCartItemQuantity=async(req,res)=>{
         success:true
     })
   
+}
+
+export const removeCartItem=async(req,res)=>{
+    const {productId,variantId}=req.params
+
+
+    await cartModel.findOneAndUpdate(
+        {user:req.user._id},
+        {$pull:{items:{product:productId,variant:variantId}}},
+        {new:true}
+    )
+
+    return res.status(200).json({
+        message:"Cart item removed successfully",
+        success:true
+    })
 }
