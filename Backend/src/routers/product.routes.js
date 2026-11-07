@@ -26,4 +26,5 @@ router.get("/detail/:id",getProductDetails)
 
 router.post("/:productId/variants", authenticateSeller, upload.array('images', 7),addProductVariant)
 
+
 export default router

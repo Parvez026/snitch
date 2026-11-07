@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
 import { useSelector } from "react-redux";
 import {Search,ShoppingBag,Heart,ChevronLeft,ChevronRight} from "lucide-react";
-import Nav from "../../shared/components/Nav";
 import { useNavigate } from "react-router";
 
 const categories = [
@@ -216,9 +215,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#171717]">
-
-      {/* Navbar */}
-      <Nav cartCount={cartCount} setMenuOpen={setMenuOpen} menuOpen={menuOpen}/>
 
       {/* Hero Section */}
 
