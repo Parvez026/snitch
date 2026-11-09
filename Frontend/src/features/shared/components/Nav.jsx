@@ -8,10 +8,12 @@ const Nav = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const cartItems = useSelector((state) => state.cart?.items ?? []);
+
+  const cartItems = useSelector((state) => state.cart);
+console.log(cartItems);
 
   // Calculate total quantity of products
-  const totalCartItems = cartItems.reduce((total, item) => total + item.quantity,0);
+  const totalCartItems = cartItems?.items?.reduce((total, item) => total + item.quantity,0);
 
   return (
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#101010] text-white">

@@ -23,27 +23,27 @@ export const useCart = () => {
 
   async function handleGetCart() {
     const data = await getCart()
-    dispatch(setItem(data.cart.items))
+    console.log(data.cart)
+     dispatch(setItem(data.cart))
   }
 
-  async function handleIncrementCartItem({ productId, variantId }) {
-    await incrementCartItemQuantity({ productId, variantId })
-    dispatch(incrementCartItems({ productId, variantId }))
-  }
+ async function handleIncrementCartItem({ productId, variantId }) {
+  await incrementCartItemQuantity({ productId, variantId });
 
-  async function handleDecrementCartItem({ productId, variantId}) {
-    await decrementCartItemQuantity({ productId, variantId })
-    dispatch(decrementCartItems({ productId, variantId }))
-  }
+  dispatch(incrementCartItems({ productId, variantId }));
+  console.log("Increment dispatched");
+}
+
+ async function handleDecrementCartItem({ productId, variantId }) {
+  await decrementCartItemQuantity({ productId, variantId });
+
+    dispatch(decrementCartItems({ productId, variantId }));
+}
 
   async function handleRemoveItem({ productId, variantId }) {
+    await removeItem({ productId, variantId })
+
     dispatch(removeItemByIds({ productId, variantId }))
-    try {
-      await removeItem({ productId, variantId })
-    } catch (err) {
-      console.error("Remove failed:", err)
-      await handleGetCart()
-    }
   }
 
   return {
