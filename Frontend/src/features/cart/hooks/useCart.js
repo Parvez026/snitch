@@ -31,8 +31,7 @@ export const useCart = () => {
     dispatch(incrementCartItems({ productId, variantId }))
   }
 
-  async function handleDecrementCartItem({ productId, variantId, currentQty }) {
-    if (currentQty <= 1) return
+  async function handleDecrementCartItem({ productId, variantId}) {
     await decrementCartItemQuantity({ productId, variantId })
     dispatch(decrementCartItems({ productId, variantId }))
   }
@@ -43,7 +42,6 @@ export const useCart = () => {
       await removeItem({ productId, variantId })
     } catch (err) {
       console.error("Remove failed:", err)
-      // Re-fetch cart to restore state on error
       await handleGetCart()
     }
   }

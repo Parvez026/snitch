@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useCart } from '../hooks/useCart';
 import { useNavigate, Link } from 'react-router';
 
+
 /* ─── Helpers ───────────────────────────────────────────────────────────── */
 const sym = { INR: '₹', USD: '$', EUR: '€', GBP: '£' };
 const fmt = (amount, currency = 'INR') =>
@@ -13,7 +14,7 @@ const QtyControl = ({ value, onDecrease, onIncrease, loading }) => (
   <div className="flex items-center gap-0 border border-[#e5ddd3] rounded-lg overflow-hidden">
     <button
       onClick={onDecrease}
-      disabled={loading || value <= 1}
+      disabled={loading}
       className="w-9 h-9 flex items-center justify-center text-[#171717] hover:bg-[#f2efec] disabled:opacity-30 transition-colors text-lg font-light"
       aria-label="Decrease quantity"
     >
@@ -64,10 +65,13 @@ const CartItem = ({ item, onRemove, onIncrement, onDecrement }) => {
   const variantAttrs = variant?.attributes ? Object.entries(variant.attributes) : [];
 
   const handleDecrease = async () => {
-    if (item.quantity <= 1) return;
     setQtyLoading(true);
     try {
-      await onDecrement({ productId, variantId, currentQty: item.quantity });
+     if(item.quantity===1){
+      await onRemove({productId,variantId})
+     }else{
+         await onDecrement({ productId, variantId, currentQty: item.quantity });
+     }
     } finally {
       setQtyLoading(false);
     }
