@@ -5,8 +5,8 @@ const cartSlice = createSlice({
   name: "cart",
 
   initialState: {
-    totalPrice: 0,
-    currency: "INR",
+    totalPrice: null,
+    currency: null,
     items: [],
   },
 
@@ -26,13 +26,13 @@ const cartSlice = createSlice({
 
       const item = state.items.find(
         (item) =>
-          String(item.product?._id) === String(productId) &&
-          String(item.variant) === String(variantId)
+          item.product?._id === productId &&
+          item.variant === variantId
       );
 
       if (item) {
         item.quantity += 1;
-        state.totalPrice += item.price.amount;
+        state.totalPrice += item.product.variants.price.amount;
       }
     },
 
@@ -41,13 +41,13 @@ const cartSlice = createSlice({
 
       const item = state.items.find(
         (item) =>
-          String(item.product?._id) === String(productId) &&
-          String(item.variant) === String(variantId)
+          item.product?._id === productId &&
+          item.variant === variantId
       );
 
       if (item && item.quantity > 1) {
         item.quantity -= 1;
-        state.totalPrice -= item.price.amount;
+        state.totalPrice -= item.product.variants.price.amount;
       }
     },
 
@@ -56,18 +56,18 @@ const cartSlice = createSlice({
 
       const item = state.items.find(
         (item) =>
-          String(item.product?._id) === String(productId) &&
-          String(item.variant) === String(variantId)
+          item.product?._id === productId &&
+          item.variant === variantId
       );
 
       if (item) {
-        state.totalPrice -= item.price.amount * item.quantity;
+        state.totalPrice -= item.product.variants.price.amount * item.quantity;
 
         state.items = state.items.filter(
           (item) =>
             !(
-              String(item.product?._id) === String(productId) &&
-              String(item.variant) === String(variantId)
+              item.product?._id === productId &&
+              item.variant === variantId
             )
         );
       }

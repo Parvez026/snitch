@@ -18,6 +18,8 @@ export const useCart = () => {
 
   async function handleAddItem({ productId, variantId }) {
     const data = await addItem({ productId, variantId })
+
+    await handleGetCart();
     return data
   }
 

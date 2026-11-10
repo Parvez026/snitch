@@ -77,6 +77,15 @@ export const login = async (req, res) => {
     await sendTokenResponse(user, res, "User logged in successfully")
 }
 
+export const logout = async (req, res) => {
+    res.clearCookie("token")
+
+    res.status(200).json({
+        message: "User logged out successfully",
+        success: true
+    })
+}
+
 export const googleCallback = async (req, res) => {
     const { id, displayName, emails, photos } = req.user
     const email = emails[ 0 ].value;

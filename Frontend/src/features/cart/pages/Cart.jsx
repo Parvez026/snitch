@@ -46,6 +46,9 @@ const CartItem = ({ item, onRemove, onIncrement, onDecrement }) => {
   const productId = product._id;
   const variantId = item.variant;
 
+ console.log("item",item.quantity);
+ 
+
   const variant = Array.isArray(product.variants) ? product.variants.find((v) => String(v._id) === String(variantId))
     : String(product.variants?._id) === String(variantId)
     ? product.variants
@@ -55,8 +58,9 @@ const CartItem = ({ item, onRemove, onIncrement, onDecrement }) => {
   const thumbnail = images[0]?.url;
 
   // Price
+  const price=item.product.variants.price.amount
   const currency = item.price?.currency || 'INR';
-  const linePrice =(item.price?.amount || 0) * (item.quantity || 0);
+  const linePrice =(price || 0) * (item.quantity || 0);
 
   // Variant attributes
   const variantAttrs = variant?.attributes? Object.entries(variant.attributes):[];
@@ -168,7 +172,7 @@ const CartItem = ({ item, onRemove, onIncrement, onDecrement }) => {
 
         {/* Unit Price */}
         <p className="text-xs text-[#B5ADA3]">
-          {fmt(item.price?.amount, currency)} each
+          {fmt(price, currency)} each
         </p>
 
 
@@ -256,7 +260,7 @@ const OrderSummary = ({ items, onCheckout,cartData }) => {
   // Calculate subtotal
   const subtotal = cartData?.totalPrice || 0;
 
-  const currency = items[0]?.price?.currency || 'INR';
+  const currency = cartData.currency ;
 
   const shipping = subtotal > 1500 ? 0 : 99;
 
@@ -521,17 +525,14 @@ const Cart = () => {
 
   const cartData = useSelector((state) => state.cart);
   const {handleGetCart,handleRemoveItem,handleIncrementCartItem,handleDecrementCartItem} = useCart();
-
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Extract actual products from API response
  const items = cartData?.items || [];
 
-
 // Get total price and currency from Redux
 const totalPrice = cartData?.totalPrice || 0;
-const currency = cartData?.currency || "INR";
 
 console.log("cartData:", cartData);
 console.log("items:", items);

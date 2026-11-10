@@ -1,19 +1,48 @@
+
 import React, { useState } from "react";
-import {Search,ShoppingBag,UserRound,Menu,X,} from "lucide-react";
+import {
+  Search,
+  ShoppingBag,
+  UserRound,
+  Menu,
+  X,
+  LogIn,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
+
 import { Link, useNavigate } from "react-router";
 import { useSelector } from "react-redux";
+import { useAuth } from "../../auth/hooks/useAuth.js";
 
 const Nav = () => {
+  const cartItems = useSelector((state) => state.cart);
+  const user = useSelector((state) => state.auth.user);
+
+  const { handleLogout } = useAuth();
+
   const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
+  // Calculate total quantity
+  const totalCartItems = cartItems?.items?.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
-  const cartItems = useSelector((state) => state.cart);
-console.log(cartItems);
+  // Logout handler
+  const handleUserLogout = async () => {
+    try {
+      await handleLogout();
 
-  // Calculate total quantity of products
-  const totalCartItems = cartItems?.items?.reduce((total, item) => total + item.quantity,0);
+      setIsProfileOpen(false);
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#101010] text-white">
@@ -38,9 +67,9 @@ console.log(cartItems);
             Shop
           </a>
 
-          <a href="#about" className="transition hover:text-white">
+          <Link to="/about" className="transition hover:text-white">
             About
-          </a>
+          </Link>
 
           <a href="#contact" className="transition hover:text-white">
             Contact
@@ -69,12 +98,88 @@ console.log(cartItems);
             )}
           </button>
 
-          <button
-            aria-label="User profile"
-            className="hidden md:block"
-          >
-            <UserRound size={21} />
-          </button>
+          {/* User Profile Popup */}
+          <div className="relative">
+
+            <button
+              aria-label="User profile"
+              onClick={() => setIsProfileOpen((prev) => !prev)}
+              className="flex items-center gap-1 transition hover:text-gray-300"
+            >
+              <UserRound size={21} />
+              <ChevronDown
+                size={14}
+                className={`transition-transform ${
+                  isProfileOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* Dropdown */}
+            {isProfileOpen && (
+              <div className="absolute right-0 top-12 z-[60] w-64 overflow-hidden rounded-xl border border-[#e5ddd3] bg-[#faf9f7] text-[#171717] shadow-2xl">
+
+                {user ? (
+                  <>
+                    {/* Logged In */}
+                    <div className="border-b border-[#e5ddd3] px-5 py-4">
+                      <p className="text-xs text-[#82776d]">
+                        Welcome back
+                      </p>
+
+                      <h3 className="mt-1 truncate text-sm font-bold">
+                        {user.fullName || user.name || user.email || "User"}
+                      </h3>
+
+                      {user.email && (
+                        <p className="mt-1 truncate text-xs text-[#82776d]">
+                          {user.email}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="p-2">
+                      <button
+                        onClick={handleUserLogout}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                      >
+                        <LogOut size={17} />
+                        Logout
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Logged Out */}
+                    <div className="px-5 py-4">
+                      <h3 className="text-sm font-bold">
+                        Welcome to SNITCH
+                      </h3>
+
+                      <p className="mt-1 text-xs leading-5 text-[#82776d]">
+                        Login to explore your account and shop your
+                        favourite styles.
+                      </p>
+                    </div>
+
+                    <div className="border-t border-[#e5ddd3] p-3">
+                      <button
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          navigate("/login");
+                        }}
+                        className="flex w-full items-center justify-center gap-2 rounded-full bg-[#171717] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#82776d]"
+                      >
+                        <LogIn size={17} />
+                        Login / Sign Up
+                      </button>
+                    </div>
+                  </>
+                )}
+
+              </div>
+            )}
+          </div>
 
           {/* Mobile Menu Toggle */}
           <button
@@ -82,11 +187,7 @@ console.log(cartItems);
             aria-label="Toggle menu"
             onClick={() => setIsMenuOpen((prev) => !prev)}
           >
-            {isMenuOpen ? (
-              <X size={23} />
-            ) : (
-              <Menu size={23} />
-            )}
+            {isMenuOpen ? <X size={23} /> : <Menu size={23} />}
           </button>
 
         </div>
@@ -104,9 +205,9 @@ console.log(cartItems);
             Shop
           </a>
 
-          <a href="#about" onClick={() => setIsMenuOpen(false)}>
+          <Link to="/about" onClick={() => setIsMenuOpen(false)}>
             About
-          </a>
+          </Link>
 
           <a href="#contact" onClick={() => setIsMenuOpen(false)}>
             Contact
