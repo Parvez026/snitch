@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useCart } from '../hooks/useCart';
 import { useNavigate, Link } from 'react-router';
+import { useRazorpay} from "react-razorpay";
 
 // Currency formatter
 const sym = {INR: '₹',USD: '$',EUR: '€',GBP: '£',};
@@ -251,7 +252,7 @@ const CartItem = ({ item, onRemove, onIncrement, onDecrement }) => {
 };
 
 // Order Summary
-const OrderSummary = ({ items, onCheckout,cartData }) => {
+const OrderSummary = ({ items, onCheckout,cartData,handleCheckout }) => {
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState('');
@@ -404,7 +405,7 @@ const OrderSummary = ({ items, onCheckout,cartData }) => {
 
       {/* Checkout */}
       <button
-        onClick={onCheckout}
+        onClick={handleCheckout}
         className="w-full h-14 rounded-xl bg-[#171717] text-white font-syne font-extrabold text-sm uppercase tracking-wider hover:bg-[#333] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow flex items-center justify-center gap-2.5"
       >
         <svg
@@ -524,9 +525,11 @@ const EmptyCart = () => (
 const Cart = () => {
 
   const cartData = useSelector((state) => state.cart);
-  const {handleGetCart,handleRemoveItem,handleIncrementCartItem,handleDecrementCartItem} = useCart();
+  const {handleGetCart,handleRemoveItem,handleIncrementCartItem,handleDecrementCartItem,handleCreteCartOrder,handleVerifyCartOrder} = useCart();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { error, isLoading, Razorpay } = useRazorpay();
+  const user=useSelector((state)=>state.auth.user)
 
   // Extract actual products from API response
  const items = cartData?.items || [];
@@ -553,10 +556,40 @@ console.log("totalPrice:", totalPrice);
     load();
   }, []);
 
+  async function handleCheckout(){
+    const order = await handleCreteCartOrder();
+    console.log(order);
 
-  // Total quantity of all products
+  const options = {
+      key: "rzp_test_TyQsjBeVuMNWEr",
+      amount:order.amount, // Amount in paise
+      currency: order.currency,
+      name: "Snitch",
+      description: "Test Transaction",
+      order_id: order.id, // Generate order_id on server
+      handler:async (response) => {
+        
+        const isValid=await handleVerifyCartOrder(response);
+        if(isValid){
+          navigate(`/order-success?order_id=${response?.razorpay_order_id}`);
+        }
+      },
+      prefill: {
+        name: user?.fullName,
+        email: user?.email,
+        contact: user?.contact,
+      },
+      theme: {
+        color: "#F37254",
+      },
+    };
+
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.open();
+}
+
+// Total quantity of all products
 const totalItems = items.reduce((acc, item) => acc + (item.quantity || 0),0);
-
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#171717]">
 
@@ -710,6 +743,7 @@ const totalItems = items.reduce((acc, item) => acc + (item.quantity || 0),0);
             <OrderSummary
               items={items}
               cartData={cartData}
+              handleCheckout={handleCheckout}
               onCheckout={() => navigate('/checkout')}
             />
           </div>
