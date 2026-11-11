@@ -19,7 +19,7 @@ const authSlice=createSlice({
         },
         setLogout:(state)=>{
             state.user=null;
-        }
+}
     }
    
 })

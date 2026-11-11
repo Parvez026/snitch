@@ -18,6 +18,8 @@ import { useAuth } from "../../auth/hooks/useAuth.js";
 const Nav = () => {
   const cartItems = useSelector((state) => state.cart);
   const user = useSelector((state) => state.auth.user);
+  console.log(user);
+  
 
   const { handleLogout } = useAuth();
 
@@ -136,6 +138,14 @@ const Nav = () => {
                           {user.email}
                         </p>
                       )}
+                    </div>
+                    <div className="p-2 border-b border-[#e5ddd3]">
+                      <button 
+                      onClick={() =>(navigate("/order-success"),
+                         setIsProfileOpen((prev) => !prev))
+                        }
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-black transition hover:bg-gray-200/60"
+                      >Track Order</button>
                     </div>
 
                     <div className="p-2">
