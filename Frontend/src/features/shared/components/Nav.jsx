@@ -18,7 +18,8 @@ import { useAuth } from "../../auth/hooks/useAuth.js";
 const Nav = () => {
   const cartItems = useSelector((state) => state.cart);
   const user = useSelector((state) => state.auth.user);
-  console.log(user);
+
+console.log(user?.fullName);
   
 
   const { handleLogout } = useAuth();
@@ -27,6 +28,17 @@ const Nav = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const getInitials = (fullName) => {
+  if (!fullName) return "";
+
+  return fullName
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((name) => name[0].toUpperCase())
+    .join("");
+};
 
   // Calculate total quantity
   const totalCartItems = cartItems?.items?.reduce(
@@ -80,11 +92,9 @@ const Nav = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-4 md:gap-6">
-
           <button aria-label="Search">
             <Search size={21} />
           </button>
-
           {/* Cart */}
           <button
             className="relative"
@@ -102,20 +112,19 @@ const Nav = () => {
 
           {/* User Profile Popup */}
           <div className="relative">
-
-            <button
-              aria-label="User profile"
-              onClick={() => setIsProfileOpen((prev) => !prev)}
-              className="flex items-center gap-1 transition hover:text-gray-300"
-            >
+          <button
+           aria-label="User profile"
+           onClick={() => setIsProfileOpen((prev) => !prev)}
+           className="flex items-center transition hover:text-gray-300"
+          >
+          {user?.fullName ? (
+          <span className="w-9 h-9 rounded-full bg-green-400 text-black flex items-center justify-center text-[15px] font-bold">
+            {getInitials(user.fullName)}
+          </span>
+            ) : (
               <UserRound size={21} />
-              <ChevronDown
-                size={14}
-                className={`transition-transform ${
-                  isProfileOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
+          )}
+       </button>
 
             {/* Dropdown */}
             {isProfileOpen && (

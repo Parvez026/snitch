@@ -95,7 +95,7 @@ const OrderSuccess = () => {
                 <span className="text-[10px] uppercase tracking-[0.28em] font-bold text-emerald-700 block mb-0.5">
                   Order Successfully Verified
                 </span>
-                <h1 className="font-syne text-2xl sm:text-3xl font-extrabold tracking-tight text-[#171717]">
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#171717]">
                   Thank You for Your Order
                 </h1>
               </div>
@@ -148,7 +148,7 @@ const OrderSuccess = () => {
               <span className="text-[10px] uppercase tracking-widest text-[#82776d] font-bold block mb-1">
                 Estimated Delivery
               </span>
-              <span className="font-syne text-xs sm:text-sm font-bold text-[#171717]">
+              <span className=" text-xs sm:text-sm font-bold text-[#171717]">
                 {deliveryRange}
               </span>
             </div>
@@ -232,7 +232,7 @@ const OrderSuccess = () => {
                       <span className="w-1.5 h-1.5 rounded-full bg-stone-300" />
                     )}
                   </div>
-                  <h4 className="font-syne font-bold text-xs leading-snug">
+                  <h4 className=" font-bold text-xs leading-snug">
                     {label}
                   </h4>
                   <p className={`text-[10px] mt-1 line-clamp-1 ${done ? 'text-stone-300' : 'text-stone-400'}`}>
@@ -284,7 +284,7 @@ const OrderSuccess = () => {
           <div className="mt-10 pt-8 border-t border-[#e5ddd3] flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
             <Link
               to="/"
-              className="w-full sm:w-auto h-12 px-8 rounded-xl bg-[#171717] hover:bg-[#333] text-white font-syne font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-sm active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full sm:w-auto h-12 px-8 rounded-xl bg-[#171717] hover:bg-[#333] text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-sm active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
@@ -313,7 +313,7 @@ const OrderSuccess = () => {
                 <p className="text-[10px] uppercase tracking-[0.28em] font-semibold text-stone-400 mb-1">
                   CURATED LOOKBOOK
                 </p>
-                <h3 className="font-syne text-2xl font-bold text-stone-900 tracking-tight">
+                <h3 className="text-2xl font-bold text-stone-900 tracking-tight">
                   You Might Also Admire
                 </h3>
               </div>
@@ -343,7 +343,7 @@ const OrderSuccess = () => {
                         loading="lazy"
                       />
                     </div>
-                    <h4 className="font-syne font-bold text-sm text-[#171717] line-clamp-1 group-hover:text-stone-600 transition-colors">
+                    <h4 className=" font-bold text-sm text-[#171717] line-clamp-1 group-hover:text-stone-600 transition-colors">
                       {prod.title}
                     </h4>
                     <p className="text-xs font-bold text-stone-900 mt-1">

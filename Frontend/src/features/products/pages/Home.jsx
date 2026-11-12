@@ -39,7 +39,7 @@ const ProductCard = ({ product, onAddToCart,navigate }) => {
       {/* Main Image */}
       <div
         onClick={() => navigate(`/product/${product._id}`)}
-        className="aspect-[3/4] cursor-pointer overflow-hidden"
+        className="aspect-[3/3.5] cursor-pointer overflow-hidden"
       >
         {images[activeImage]?.url ? (
           <img
@@ -125,10 +125,10 @@ const ProductCard = ({ product, onAddToCart,navigate }) => {
     </div>
 
     {/* Product Details — inside the same card */}
-    <div className="px-2 pt-4">
+    <div className="px-2 pt-2">
 
       {/* Title and Price */}
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-2">
         <h3
           onClick={() => navigate(`/product/${product._id}`)}
           className="cursor-pointer text-sm font-medium leading-5 text-[#171717] hover:text-gray-500 md:text-base"
@@ -141,11 +141,6 @@ const ProductCard = ({ product, onAddToCart,navigate }) => {
           {product.price?.amount?.toLocaleString("en-IN")}
         </p>
       </div>
-
-      {/* Description */}
-      <p className="mt-2 line-clamp-2 min-h-10 text-xs leading-5 text-[#82776d] md:text-sm">
-        {product.description || "Discover the details of this piece."}
-      </p>
 
       {/* Add To Cart */}
       {/* <button

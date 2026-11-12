@@ -20,7 +20,7 @@ async function sendTokenResponse(user, res, message) {
             id: user._id,
             email: user.email,
             contact: user.contact,
-            fullName: user.fullName,
+            fullName:user.fullName,
             role: user.role
         }
     })
@@ -126,7 +126,7 @@ export const getMe = async (req, res) => {
             id: user._id,
             email: user.email,
             contact: user.contact,
-            fullname: user.fullname,
+            fullName: user.fullName,
             role: user.role
         }
     })

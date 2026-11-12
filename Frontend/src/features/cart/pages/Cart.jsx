@@ -165,7 +165,7 @@ const CartItem = ({ item, onRemove, onIncrement, onDecrement }) => {
             </p>
           </div>
 
-          <span className="font-syne font-bold text-sm sm:text-base text-[#171717] whitespace-nowrap flex-shrink-0">
+          <span className=" font-bold text-sm sm:text-base text-[#171717] whitespace-nowrap flex-shrink-0">
             {fmt(linePrice, currency)}
           </span>
         </div>
@@ -306,7 +306,7 @@ const OrderSummary = ({ items, onCheckout,cartData,handleCheckout }) => {
   return (
     <div className="rounded-2xl border border-[#e5ddd3] bg-[#fbf9f6] p-6 sm:p-7 flex flex-col gap-5 sticky top-28">
 
-      <h2 className="font-syne text-lg font-extrabold text-[#171717] tracking-tight">
+      <h2 className=" text-lg font-extrabold text-[#171717] tracking-tight">
         Order Summary
       </h2>
 
@@ -372,11 +372,11 @@ const OrderSummary = ({ items, onCheckout,cartData,handleCheckout }) => {
 
       {/* Total */}
       <div className="border-t border-[#e5ddd3] pt-4 flex justify-between items-center">
-        <span className="font-syne font-extrabold text-base text-[#171717]">
+        <span className=" font-extrabold text-base text-[#171717]">
           Total
         </span>
 
-        <span className="font-syne font-extrabold text-xl text-[#171717]">
+        <span className=" font-extrabold text-xl text-[#171717]">
           {fmt(total, currency)}
         </span>
       </div>
@@ -406,7 +406,7 @@ const OrderSummary = ({ items, onCheckout,cartData,handleCheckout }) => {
       {/* Checkout */}
       <button
         onClick={handleCheckout}
-        className="w-full h-14 rounded-xl bg-[#171717] text-white font-syne font-extrabold text-sm uppercase tracking-wider hover:bg-[#333] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow flex items-center justify-center gap-2.5"
+        className="w-full h-14 rounded-xl bg-[#171717] text-white font-extrabold text-sm uppercase tracking-wider hover:bg-[#333] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow flex items-center justify-center gap-2.5"
       >
         <svg
           className="w-4 h-4"
@@ -489,7 +489,7 @@ const EmptyCart = () => (
       </svg>
     </div>
 
-    <h2 className="font-syne text-2xl font-extrabold text-[#171717] tracking-tight mb-2">
+    <h2 className=" text-2xl font-extrabold text-[#171717] tracking-tight mb-2">
       Your Bag is Empty
     </h2>
 
@@ -499,7 +499,7 @@ const EmptyCart = () => (
 
     <Link
       to="/"
-      className="inline-flex items-center gap-2 h-12 px-8 rounded-xl bg-[#171717] text-white font-syne font-bold text-xs uppercase tracking-wider hover:bg-[#333] transition-all duration-200 active:scale-[0.98] shadow-sm"
+      className="inline-flex items-center gap-2 h-12 px-8 rounded-xl bg-[#171717] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#333] transition-all duration-200 active:scale-[0.98] shadow-sm"
     >
       <svg
         className="w-4 h-4"
@@ -603,7 +603,7 @@ const totalItems = items.reduce((acc, item) => acc + (item.quantity || 0),0);
               MY BAG
             </p>
 
-            <h1 className="font-syne text-3xl sm:text-4xl font-extrabold tracking-tight text-[#171717]">
+            <h1 className=" text-3xl sm:text-4xl font-extrabold tracking-tight text-[#171717]">
               Shopping Cart
 
               {!loading && items.length > 0 && (
