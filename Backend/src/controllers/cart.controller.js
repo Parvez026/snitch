@@ -5,6 +5,7 @@ import productModel from "../models/product.model.js";
 import { getCartDetails } from "../dao/cart.dao.js";
 import { createOrder } from "../services/payment.service.js";
 import paymentModel from "../models/payment.model.js";
+import addressModel from "../models/address.model.js";
 import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils.js";
 import { config } from "../config/config.js";
 
@@ -230,6 +231,23 @@ export const removeCartItem = async (req, res) => {
 };
 
 export const creteOrderController = async (req, res) => {
+   const userId = req.user._id;
+  const { addressId } = req.body;
+
+  const address = await addressModel.findOne({
+    _id: addressId,
+    user: userId,
+  });
+
+  if (!address) {
+    return res.status(404).json({
+      message: "Delivery address not found",
+      success: false,
+    });
+  }
+
+
+
   const cart = await getCartDetails(req.user._id);
 
   if (!cart) {
@@ -238,7 +256,11 @@ export const creteOrderController = async (req, res) => {
       success: false,
     });
   }
-  const order = await createOrder({amount: cart.totalPrice,currency: cart.currency,});
+  const order = await createOrder({
+    amount: cart.totalPrice,
+    currency: cart.currency,
+  });
+
   const payment = await paymentModel.create({
     user: req.user._id,
     razorpay: {
@@ -247,6 +269,18 @@ export const creteOrderController = async (req, res) => {
     price:{
       amount:cart.totalPrice,
       currency:cart.currency
+    },
+
+     shippingAddress: {
+      fullName: address.fullName,
+      phone: address.phone,
+      email: address.email,
+      addressLine: address.addressLine,
+      city: address.city,
+      state: address.state,
+      pincode: address.pincode,
+      landmark: address.landmark,
+      addressType: address.addressType,
     },
 
     orderItems:cart.items.map((item)=>({
@@ -316,3 +350,35 @@ export const verifyOrderController = async (req, res) => {
         success: true
     })
 }
+
+export const getOrderDetailsController = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { orderId } = req.params;
+
+    const order = await paymentModel.findOne({
+      "razorpay.orderId": orderId,
+      user: userId,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Order details fetched successfully",
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.log("Get order details error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};

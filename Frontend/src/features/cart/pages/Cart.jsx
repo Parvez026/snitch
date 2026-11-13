@@ -252,7 +252,7 @@ const CartItem = ({ item, onRemove, onIncrement, onDecrement }) => {
 };
 
 // Order Summary
-const OrderSummary = ({ items, onCheckout,cartData,handleCheckout }) => {
+const OrderSummary = ({ items, onCheckout,cartData }) => {
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState('');
@@ -404,26 +404,12 @@ const OrderSummary = ({ items, onCheckout,cartData,handleCheckout }) => {
 
 
       {/* Checkout */}
-      <button
-        onClick={handleCheckout}
-        className="w-full h-14 rounded-xl bg-[#171717] text-white font-extrabold text-sm uppercase tracking-wider hover:bg-[#333] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow flex items-center justify-center gap-2.5"
-      >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-          />
-        </svg>
-
-        Secure Checkout
-      </button>
+     <button
+      onClick={onCheckout}
+      className="w-full h-14 rounded-xl bg-[#171717] text-white font-extrabold text-sm uppercase tracking-wider hover:bg-[#333] transition-all"
+       >
+      Secure Checkout
+     </button>
 
 
       {/* Trust Badges */}
@@ -740,11 +726,10 @@ const totalItems = items.reduce((acc, item) => acc + (item.quantity || 0),0);
             </div>
 
             {/* Right: Order Summary */}
-            <OrderSummary
-              items={items}
-              cartData={cartData}
-              handleCheckout={handleCheckout}
-              onCheckout={() => navigate('/checkout')}
+           <OrderSummary
+            items={items}
+            cartData={cartData}
+            onCheckout={() => navigate('/checkout')}
             />
           </div>
         )}

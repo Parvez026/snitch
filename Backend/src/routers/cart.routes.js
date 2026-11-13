@@ -1,7 +1,7 @@
 import express from "express"
 import { authenticateUser } from "../middleware/auth.middleware.js"
 import { cartValidator, incrementCartItemQuantityValidator } from "../validator/cart.validator.js"
-import { addToCart, getCart, incrementCartItemQuantity,decrementCartItemQuantity,removeCartItem, creteOrderController, verifyOrderController } from "../controllers/cart.controller.js"
+import { addToCart, getCart, incrementCartItemQuantity,decrementCartItemQuantity,removeCartItem, creteOrderController, verifyOrderController, getOrderDetailsController } from "../controllers/cart.controller.js"
 
 const router=express.Router()
 
@@ -19,5 +19,8 @@ router.delete("/remove/:productId/:variantId",authenticateUser,incrementCartItem
 router.post("/payment/create/order",authenticateUser,creteOrderController)
 
 router.post("/payment/verify/order",authenticateUser,verifyOrderController)
+
+router.get( "/order/:orderId", authenticateUser,getOrderDetailsController
+);
 
 export default router
