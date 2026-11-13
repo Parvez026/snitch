@@ -343,7 +343,7 @@ const OrderSuccess = () => {
                         loading="lazy"
                       />
                     </div>
-                    <h4 className=" font-bold text-sm text-[#171717] line-clamp-1 group-hover:text-stone-600 transition-colors">
+                    <h4 className="font-bold text-sm text-[#171717] line-clamp-1 group-hover:text-stone-600 transition-colors">
                       {prod.title}
                     </h4>
                     <p className="text-xs font-bold text-stone-900 mt-1">

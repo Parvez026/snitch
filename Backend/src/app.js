@@ -4,6 +4,7 @@ import morgan from "morgan";
 import authRouter from "./routers/auth.routes.js"
 import productRouter from "./routers/product.routes.js"
 import cartRouter from "./routers/cart.routes.js"
+import addressRouter from "./routers/address.routes.js";
 import cors from "cors";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20"
@@ -39,5 +40,6 @@ app.get("/", (_req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart",cartRouter)
+app.use("/api/address",addressRouter)
 
 export default app;

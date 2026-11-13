@@ -9,6 +9,8 @@ import ProductDetail from "../features/products/pages/ProductDetail";
 import SellerProductDetail from "../features/products/pages/SellerProductDetail";
 import Cart from "../features/cart/pages/Cart";
 import OrderSuccess from "../features/cart/pages/OrderSuccess";
+import Address from "../features/address/pages/Address";
+
 import AppLayout from "./AppLayout";
 import About from "../features/shared/components/About";
 
@@ -44,6 +46,10 @@ export const Router = createBrowserRouter([
   {
     path:"/order-success",
     element:<Protected><OrderSuccess/></Protected>
+  },
+  {
+    path:"/address",
+    element:<Protected><Address/></Protected>
   },
   {
     path:"/seller",

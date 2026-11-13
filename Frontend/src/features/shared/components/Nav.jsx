@@ -8,7 +8,7 @@ import {
   X,
   LogIn,
   LogOut,
-  ChevronDown,
+  MapPin,
 } from "lucide-react";
 
 import { Link, useNavigate } from "react-router";
@@ -19,26 +19,22 @@ const Nav = () => {
   const cartItems = useSelector((state) => state.cart);
   const user = useSelector((state) => state.auth.user);
 
-console.log(user?.fullName);
-  
-
   const { handleLogout } = useAuth();
-
   const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const getInitials = (fullName) => {
-  if (!fullName) return "";
+    if (!fullName) return "";
 
-  return fullName
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((name) => name[0].toUpperCase())
-    .join("");
-};
+    return fullName
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((name) => name[0].toUpperCase())
+      .join("");
+  };
 
   // Calculate total quantity
   const totalCartItems = cartItems?.items?.reduce(
@@ -60,7 +56,6 @@ console.log(user?.fullName);
 
   return (
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#101010] text-white">
-
       <div className="mx-auto flex h-[72px] max-w-[1500px] items-center justify-between px-5 md:px-10">
 
         {/* Logo */}
@@ -92,9 +87,12 @@ console.log(user?.fullName);
 
         {/* Actions */}
         <div className="flex items-center gap-4 md:gap-6">
+
+          {/* Search */}
           <button aria-label="Search">
             <Search size={21} />
           </button>
+
           {/* Cart */}
           <button
             className="relative"
@@ -112,19 +110,19 @@ console.log(user?.fullName);
 
           {/* User Profile Popup */}
           <div className="relative">
-          <button
-           aria-label="User profile"
-           onClick={() => setIsProfileOpen((prev) => !prev)}
-           className="flex items-center transition hover:text-gray-300"
-          >
-          {user?.fullName ? (
-          <span className="w-9 h-9 rounded-full bg-green-400 text-black flex items-center justify-center text-[15px] font-bold">
-            {getInitials(user.fullName)}
-          </span>
-            ) : (
-              <UserRound size={21} />
-          )}
-       </button>
+            <button
+              aria-label="User profile"
+              onClick={() => setIsProfileOpen((prev) => !prev)}
+              className="flex items-center transition hover:text-gray-300"
+            >
+              {user?.fullName ? (
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-green-400 text-[15px] font-bold text-black">
+                  {getInitials(user.fullName)}
+                </span>
+              ) : (
+                <UserRound size={21} />
+              )}
+            </button>
 
             {/* Dropdown */}
             {isProfileOpen && (
@@ -148,15 +146,35 @@ console.log(user?.fullName);
                         </p>
                       )}
                     </div>
-                    <div className="p-2 border-b border-[#e5ddd3]">
-                      <button 
-                      onClick={() =>(navigate("/order-success"),
-                         setIsProfileOpen((prev) => !prev))
-                        }
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-black transition hover:bg-gray-200/60"
-                      >Track Order</button>
+
+                    {/* Track Order */}
+                    <div className="border-b border-[#e5ddd3] p-2">
+                      <button
+                        onClick={() => {
+                          navigate("/order-success");
+                          setIsProfileOpen(false);
+                        }}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-black transition hover:bg-gray-200/60"
+                      >
+                        Track Order
+                      </button>
                     </div>
 
+                    {/* My Addresses */}
+                    <div className="border-b border-[#e5ddd3] p-2">
+                      <button
+                        onClick={() => {
+                          navigate("/address");
+                          setIsProfileOpen(false);
+                        }}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-black transition hover:bg-gray-200/60"
+                      >
+                        <MapPin size={17} />
+                        My Addresses
+                      </button>
+                    </div>
+
+                    {/* Logout */}
                     <div className="p-2">
                       <button
                         onClick={handleUserLogout}
@@ -181,6 +199,7 @@ console.log(user?.fullName);
                       </p>
                     </div>
 
+                    {/* Login */}
                     <div className="border-t border-[#e5ddd3] p-3">
                       <button
                         onClick={() => {
@@ -195,7 +214,6 @@ console.log(user?.fullName);
                     </div>
                   </>
                 )}
-
               </div>
             )}
           </div>
@@ -208,14 +226,12 @@ console.log(user?.fullName);
           >
             {isMenuOpen ? <X size={23} /> : <Menu size={23} />}
           </button>
-
         </div>
       </div>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="flex flex-col gap-4 border-t border-white/10 bg-[#101010] px-6 py-5 text-sm md:hidden">
-
           <Link to="/" onClick={() => setIsMenuOpen(false)}>
             Home
           </Link>
@@ -231,10 +247,8 @@ console.log(user?.fullName);
           <a href="#contact" onClick={() => setIsMenuOpen(false)}>
             Contact
           </a>
-
         </div>
       )}
-
     </nav>
   );
 };
