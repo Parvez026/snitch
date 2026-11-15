@@ -9,6 +9,8 @@ import {
   verifyCartOrder,
   getOrderDetails,
   getMyOrders,
+  getSellerOrders,
+  updateSellerOrderStatus,
 } from "../services/cart.api"
 import {
   setItem,
@@ -71,6 +73,16 @@ async function handleGetMyOrders() {
     return data.orders;
 }
 
+async function handleGetSellerOrders() {
+  const data = await getSellerOrders();
+  return data.orders;
+}
+
+async function handleUpdateSellerOrderStatus({ orderId, orderStatus }) {
+  const data = await updateSellerOrderStatus({ orderId, orderStatus });
+  return data;
+}
+
   return {
     handleAddItem,
     handleGetCart,
@@ -81,5 +93,7 @@ async function handleGetMyOrders() {
     handleVerifyCartOrder,
     handleGetOrderDetails,
     handleGetMyOrders,
+    handleGetSellerOrders,
+    handleUpdateSellerOrderStatus,
   }
 }

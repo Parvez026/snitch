@@ -58,3 +58,19 @@ export const getMyOrders = async () => {
   const response = await cartAPI.get("/my-orders");
   return response.data;
 };
+
+// Get logged-in seller's orders
+export const getSellerOrders = async () => {
+  const response = await cartAPI.get("/seller/orders");
+  return response.data;
+};
+
+// Update seller's order status
+export const updateSellerOrderStatus = async ({ orderId, orderStatus }) => {
+  const response = await cartAPI.patch(
+    `/seller/orders/${orderId}/status`,
+    { orderStatus }
+  );
+
+  return response.data;
+};

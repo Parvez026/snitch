@@ -301,80 +301,176 @@ const OrderSuccess = () => {
             {/* Divider */}
             <div className="my-6 border-t border-dashed border-stone-200" />
 
-            {/* Order Tracking */}
-            <div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-stone-900">
-                    Order Progress
-                  </h2>
-                </div>
+          
+{/* Seller-wise Order Tracking */}
+  <div>
+  <div className="mb-5">
+    <h2 className="text-xl font-semibold tracking-tight text-stone-900">
+      Order Progress
+    </h2>
 
-                <span className="w-fit rounded-full bg-stone-100 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-stone-600">
-                  {(order.orderStatus || "pending").replace("_", " ")}
-                </span>
+    <p className="mt-1 text-xs text-stone-500">
+      Track delivery updates for each seller separately.
+    </p>
+  </div>
+
+  {order.sellerOrders?.length > 0 ? (
+    <div className="space-y-5">
+      {order.sellerOrders.map((sellerOrder, index) => {
+        const steps = [
+          {
+            status: "confirmed",
+            label: "Confirmed",
+            sub: "Order confirmed",
+          },
+          {
+            status: "processing",
+            label: "Processing",
+            sub: "Preparing your order",
+          },
+          {
+            status: "shipped",
+            label: "Shipped",
+            sub: "On the way",
+          },
+          {
+            status: "delivered",
+            label: "Delivered",
+            sub: "Successfully delivered",
+          },
+        ];
+
+        const statusOrder = [
+          "confirmed",
+          "processing",
+          "shipped",
+          "delivered",
+        ];
+
+        const currentIndex = statusOrder.indexOf(
+          sellerOrder.orderStatus
+        );
+
+        return (
+          <div
+            key={sellerOrder._id || index}
+            className="rounded-xl border border-stone-200 bg-[#faf9f7] p-4 sm:p-5"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400">
+                  Seller Order {index + 1}
+                </p>
+
+                <h3 className="mt-1 text-sm font-bold text-stone-900">
+                  Your Items
+                </h3>
               </div>
 
-              {order.orderStatus === "cancelled" ? (
-                <div className="mt-5 rounded-2xl border border-red-100 bg-red-50 p-4">
-                  <p className="text-sm font-semibold text-red-700">
-                    Order Cancelled
-                  </p>
-                  <p className="mt-1 text-xs text-red-600">
-                    This order has been cancelled.
-                  </p>
+              <span className="rounded-full bg-stone-900 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-white">
+                {sellerOrder.orderStatus}
+              </span>
+            </div>
+
+            {/* Seller Products */}
+            <div className="mt-4 space-y-3">
+              {sellerOrder.items?.map((item, itemIndex) => (
+                <div
+                  key={item._id || itemIndex}
+                  className="flex items-center gap-3 border-b border-stone-200 pb-3 last:border-0 last:pb-0"
+                >
+                  <img
+                    src={
+                      item.images?.[0]?.url ||
+                      "/placeholder-image.jpg"
+                    }
+                    alt={item.title}
+                    className="h-16 w-14 rounded-lg object-cover bg-stone-200"
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <h4 className="truncate text-xs font-bold text-stone-900">
+                      {item.title}
+                    </h4>
+
+                    <p className="mt-1 text-[10px] text-stone-500">
+                      Quantity: {item.quantity}
+                    </p>
+
+                    <p className="mt-1 text-xs font-semibold text-stone-800">
+                      {fmt(
+                        item.price?.amount,
+                        item.price?.currency
+                      )}
+                    </p>
+                  </div>
                 </div>
-              ) : (
-                <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-3">
-                  {orderSteps.map(({ step, status, label, sub }) => {
-                    const stepIndex = statusOrder.indexOf(status);
-                    const done = currentStatusIndex >= stepIndex;
-                    const active = currentStatusIndex === stepIndex;
+              ))}
+            </div>
 
-                    return (
-                      <div
-                        key={step}
-                        className={`relative rounded-xl border p-3 transition-all ${
-                          done
-                            ? "border-stone-900 bg-stone-900 text-white"
-                            : "border-stone-200 bg-[#faf9f7] text-stone-400"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-[10px] tracking-widest">
-                            {step}
+            {/* Cancelled Status */}
+            {sellerOrder.orderStatus === "cancelled" ? (
+              <div className="mt-4 rounded-lg border border-red-100 bg-red-50 p-3">
+                <p className="text-xs font-semibold text-red-700">
+                  This seller's order has been cancelled.
+                </p>
+              </div>
+            ) : (
+              /* Tracking Steps */
+              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {steps.map((step, stepIndex) => {
+                  const done = currentIndex >= stepIndex;
+                  const active = currentIndex === stepIndex;
+
+                  return (
+                    <div
+                      key={step.status}
+                      className={`rounded-lg border p-3 ${
+                        done
+                          ? "border-stone-900 bg-stone-900 text-white"
+                          : "border-stone-200 bg-white text-stone-400"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[9px]">
+                          0{stepIndex + 1}
+                        </span>
+
+                        {done && (
+                          <span className="text-emerald-400">
+                            ✓
                           </span>
-
-                          {done ? (
-                            <svg className="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                            </svg>
-                          ) : (
-                            <span className="h-2 w-2 rounded-full bg-stone-300" />
-                          )}
-                        </div>
-
-                        <h3 className="mt-3 text-xs font-bold leading-snug">
-                          {label}
-                        </h3>
-
-                        <p className={`mt-1.5 text-[10px] leading-relaxed ${
-                          done ? "text-stone-400" : "text-stone-400"
-                        }`}>
-                          {sub}
-                        </p>
-
-                        {active && (
-                          <p className="mt-2 text-[8px] font-bold uppercase tracking-widest text-emerald-400">
-                            Current Stage
-                          </p>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+
+                      <h4 className="mt-2 text-[11px] font-bold">
+                        {step.label}
+                      </h4>
+
+                      <p className="mt-1 text-[9px] leading-relaxed text-stone-400">
+                        {step.sub}
+                      </p>
+
+                      {active && (
+                        <p className="mt-2 text-[8px] font-bold uppercase tracking-wider text-emerald-400">
+                          Current Stage
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  ) : (
+    <p className="rounded-xl border border-stone-200 bg-[#faf9f7] p-4 text-xs text-stone-500">
+      No seller-wise tracking information available.
+    </p>
+  )}
+  </div>
 
             {/* Divider */}
             <div className="my-6 border-t border-dashed border-stone-200" />

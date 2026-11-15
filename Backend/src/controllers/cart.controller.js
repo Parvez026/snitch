@@ -230,77 +230,137 @@ export const removeCartItem = async (req, res) => {
   });
 };
 
+
 export const creteOrderController = async (req, res) => {
-  const userId = req.user._id;
-  const { addressId } = req.body;
+  try {
+    const userId = req.user._id;
+    const { addressId } = req.body;
 
-  const address = await addressModel.findOne({
-    _id: addressId,
-    user: userId,
-  });
-
-  if (!address) {
-    return res.status(404).json({
-      message: "Delivery address not found",
-      success: false,
+    const address = await addressModel.findOne({
+      _id: addressId,
+      user: userId,
     });
-  }
 
-  const cart = await getCartDetails(req.user._id);
+    if (!address) {
+      return res.status(404).json({
+        message: "Delivery address not found",
+        success: false,
+      });
+    }
 
-  if (!cart) {
-    return res.status(400).json({
-      message: "cart is empty",
-      success: false,
+    const cart = await getCartDetails(userId);
+
+    if (!cart || !cart.items?.length) {
+      return res.status(400).json({
+        message: "Cart is empty",
+        success: false,
+      });
+    }
+
+    // STEP 1: Group cart items seller-wise
+    const sellerOrdersMap = {};
+
+    cart.items.forEach((item) => {
+      const sellerId = item.product.sellerDetails?._id;
+
+      if (!sellerId) {
+        throw new Error(
+          `Seller not found for product: ${item.product.title}`
+        );
+      }
+
+      const sellerKey = sellerId.toString();
+
+      if (!sellerOrdersMap[sellerKey]) {
+        sellerOrdersMap[sellerKey] = {
+          seller: sellerId,
+          items: [],
+          orderStatus: "confirmed",
+        };
+      }
+
+      sellerOrdersMap[sellerKey].items.push({
+        title: item.product.title,
+        productId: item.product._id,
+        variantId: item.variant,
+        quantity: item.quantity,
+        images: item.product.variants.images || item.product.images,
+        description: item.product.description,
+        price: {
+          amount: item.product.variants.price.amount,
+          currency: item.product.variants.price.currency,
+        },
+      });
     });
-  }
-  const order = await createOrder({
-    amount: cart.totalPrice,
-    currency: cart.currency,
-  });
 
-  const payment = await paymentModel.create({
-    user: req.user._id,
-    razorpay: {
-      orderId: order.id,
-    },
-    price: {
+    // STEP 2: Convert grouped sellers into array
+    const sellerOrders = Object.values(sellerOrdersMap);
+
+    // STEP 3: Create one Razorpay order
+    const order = await createOrder({
       amount: cart.totalPrice,
       currency: cart.currency,
-    },
+    });
 
-    shippingAddress: {
-      fullName: address.fullName,
-      phone: address.phone,
-      email: address.email,
-      addressLine: address.addressLine,
-      city: address.city,
-      state: address.state,
-      pincode: address.pincode,
-      landmark: address.landmark,
-      addressType: address.addressType,
-    },
+    // STEP 4: Create one payment document
+    const payment = await paymentModel.create({
+      user: userId,
 
-    orderItems: cart.items.map((item) => ({
-      title: item.product.title,
-      productId: item.product._id,
-      variantId: item.variant,
-      quantity: item.quantity,
-      images: item.product.variants.images || item.product.images,
-      description: item.product.description,
-      price: {
-        amount: item.product.variants.price.amount || item.product.price.amount,
-        currency: item.product.variants.price.currency || item.price.currency,
+      razorpay: {
+        orderId: order.id,
       },
-    })),
-  });
 
-  return res.status(200).json({
-    message: "Order create successfully",
-    success: true,
-    order,
-  });
+      price: {
+        amount: cart.totalPrice,
+        currency: cart.currency,
+      },
+
+      shippingAddress: {
+        fullName: address.fullName,
+        phone: address.phone,
+        email: address.email,
+        addressLine: address.addressLine,
+        city: address.city,
+        state: address.state,
+        pincode: address.pincode,
+        landmark: address.landmark,
+        addressType: address.addressType,
+      },
+
+      // All products for customer
+      orderItems: cart.items.map((item) => ({
+        title: item.product.title,
+        productId: item.product._id,
+        variantId: item.variant,
+        quantity: item.quantity,
+        images: item.product.variants.images || item.product.images,
+        description: item.product.description,
+        price: {
+          amount: item.product.variants.price.amount,
+          currency: item.product.variants.price.currency,
+        },
+      })),
+
+      // Seller-wise products
+      sellerOrders,
+    });
+
+    return res.status(200).json({
+      message: "Order create successfully",
+      success: true,
+      order,
+    });
+
+  } catch (error) {
+    console.log("Create Order Error:", error);
+
+    return res.status(500).json({
+      message: error.message || "Unable to create order",
+      success: false,
+    });
+  }
 };
+
 
 export const verifyOrderController = async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
@@ -383,15 +443,134 @@ export const getOrderDetailsController = async (req, res) => {
 };
 
 export const getMyOrdersController = async (req, res) => {
-  const userId = req.user._id;
+    const userId = req.user._id;
 
-  const orders = await paymentModel
-    .find({ user: userId })
-    .sort({ createdAt: -1 });
+    const orders = await paymentModel
+      .find({
+        user: userId,
+        status: "paid",
+      })
+      .sort({ createdAt: -1 });
 
-  return res.status(200).json({
-    message: "Orders fetched successfully",
-    success: true,
-    orders,
-  });
+    return res.status(200).json({
+      message: "Orders fetched successfully",
+      success: true,
+      orders,
+    });
 };
+
+
+export const getSellerOrdersController = async (req, res) => {
+  try {
+    const sellerId = req.user._id;
+
+    const orders = await paymentModel.find({
+      status: "paid",
+      "sellerOrders.seller": sellerId,
+    }).sort({ createdAt: -1 });
+
+    const sellerOrders = orders.map((order) => {
+      const sellerOrder = order.sellerOrders.find(
+        (item) => item.seller.toString() === sellerId.toString()
+      );
+
+      return {
+        orderId: order._id,
+        razorpayOrderId: order.razorpay.orderId,
+        customer: {
+          fullName: order.shippingAddress.fullName,
+          phone: order.shippingAddress.phone,
+          address: order.shippingAddress,
+        },
+        items: sellerOrder.items,
+        orderStatus: sellerOrder.orderStatus,
+        createdAt: order.createdAt,
+      };
+    });
+
+    return res.status(200).json({
+      message: "Seller orders fetched successfully",
+      success: true,
+      orders: sellerOrders,
+    });
+
+  } catch (error) {
+    console.log("Get Seller Orders Error:", error);
+
+    return res.status(500).json({
+      message: "Unable to fetch seller orders",
+      success: false,
+    });
+  }
+};
+
+
+
+export const updateSellerOrderStatusController = async (req, res) => {
+  try {
+    const sellerId = req.user._id;
+    const { orderId } = req.params;
+    const { orderStatus } = req.body;
+
+    const allowedStatuses = [
+      "confirmed",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
+
+    if (!allowedStatuses.includes(orderStatus)) {
+      return res.status(400).json({
+        message: "Invalid order status",
+        success: false,
+      });
+    }
+
+    const order = await paymentModel.findOne({
+      _id: orderId,
+      status: "paid",
+      "sellerOrders.seller": sellerId,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+        success: false,
+      });
+    }
+
+    const sellerOrder = order.sellerOrders.find(
+      (item) => item.seller.toString() === sellerId.toString()
+    );
+
+    if (!sellerOrder) {
+      return res.status(404).json({
+        message: "Seller order not found",
+        success: false,
+      });
+    }
+
+    sellerOrder.orderStatus = orderStatus;
+
+    await order.save();
+
+    return res.status(200).json({
+      message: "Order status updated successfully",
+      success: true,
+      orderStatus: sellerOrder.orderStatus,
+    });
+
+  } catch (error) {
+    console.log("Update Seller Order Status Error:", error);
+
+    return res.status(500).json({
+      message: "Unable to update order status",
+      success: false,
+    });
+  }
+};
+
+
+
+

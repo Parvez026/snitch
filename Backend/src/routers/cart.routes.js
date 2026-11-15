@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticateUser } from "../middleware/auth.middleware.js";
+import { authenticateSeller, authenticateUser } from "../middleware/auth.middleware.js";
 import {
   cartValidator,
   incrementCartItemQuantityValidator,
@@ -14,6 +14,8 @@ import {
   verifyOrderController,
   getOrderDetailsController,
   getMyOrdersController,
+  getSellerOrdersController,
+  updateSellerOrderStatusController,
 } from "../controllers/cart.controller.js";
 
 const router = express.Router();
@@ -42,7 +44,7 @@ router.patch(
 );
 
 router.delete(
-  "/remove/:productId/:variantId",
+    "/remove/:productId/:variantId",
   authenticateUser,
   incrementCartItemQuantityValidator,
   removeCartItem,
@@ -56,4 +58,11 @@ router.get("/my-orders", authenticateUser, getMyOrdersController);
 
 router.get("/order/:orderId", authenticateUser, getOrderDetailsController);
 
+router.get("/seller/orders",authenticateSeller,getSellerOrdersController);
+
+router.patch(
+  "/seller/orders/:orderId/status",
+  authenticateSeller,
+  updateSellerOrderStatusController
+);
 export default router;

@@ -14,6 +14,7 @@ import Checkout from "../features/cart/pages/Checkout";
 
 import AppLayout from "./AppLayout";
 import About from "../features/shared/components/About";
+import MyOrders from "../features/cart/pages/MyOrders";
 
 export const Router = createBrowserRouter([
 
@@ -52,6 +53,10 @@ export const Router = createBrowserRouter([
     path:"/order-success",
     element:<Protected><OrderSuccess/></Protected>
   },
+  {
+  path: "/my-orders",
+  element: <Protected><MyOrders /></Protected>
+},
   {
     path:"/address",
     element:<Protected><Address/></Protected>

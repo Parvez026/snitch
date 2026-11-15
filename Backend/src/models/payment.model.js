@@ -1,8 +1,7 @@
-
 import mongoose from "mongoose";
 import priceSchema from "./price.schema.js";
 
-// Delivery address snapshot
+//ADDRESS
 const shippingAddressSchema = new mongoose.Schema(
   {
     fullName: {
@@ -37,9 +36,10 @@ const shippingAddressSchema = new mongoose.Schema(
       default: "home",
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
+//PAYMENT
 const paymentSchema = new mongoose.Schema(
   {
     status: {
@@ -48,17 +48,49 @@ const paymentSchema = new mongoose.Schema(
       default: "pending",
     },
     orderStatus: {
-  type: String,
-  enum: [
-    "pending",
-    "confirmed",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-  ],
-  default: "pending",
-},
+      type: String,
+      enum: [
+        "pending",
+        "confirmed",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+      ],
+      default: "pending",
+    },
+
+    sellerOrders: [
+      {
+        seller: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "user",
+          required: true,
+        },
+        items: [
+          {
+            title: String,
+            productId: mongoose.Schema.Types.ObjectId,
+            variantId: mongoose.Schema.Types.ObjectId,
+            quantity: Number,
+            images: [{ url: String }],
+            description: String,
+            price: priceSchema,
+          },
+        ],
+        orderStatus: {
+          type: String,
+          enum: [
+            "confirmed",
+            "processing",
+            "shipped",
+            "delivered",
+            "cancelled",
+          ],
+          default: "confirmed",
+        },
+      },
+    ],
 
     price: {
       type: priceSchema,
@@ -77,7 +109,6 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Selected delivery address snapshot
     shippingAddress: {
       type: shippingAddressSchema,
       required: true,
@@ -95,7 +126,7 @@ const paymentSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const paymentModel = mongoose.model("payment", paymentSchema);

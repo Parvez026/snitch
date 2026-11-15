@@ -52,16 +52,17 @@ const Register = () => {
       navigate("/");
       setSuccess(true);
     } catch (err) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setSuccess(true);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  console.log("Register Error:", err);
 
+  setError(
+    err.response?.data?.message ||
+    err.message ||
+    "Registration failed. Please try again."
+  );
+} finally {
+  setLoading(false);
+}
+}
   return (
     <div className="w-full min-h-screen lg:h-screen bg-[#FAFAF8] text-stone-800 flex flex-col lg:flex-row overflow-x-hidden font-sans">
       {/* ── LEFT HALF: Minimal Form Container ───────────────────────── */}
@@ -112,7 +113,7 @@ const Register = () => {
                 <span className="text-stone-900 font-semibold">{formData.fullName}</span>.
                 {formData.isSeller && (
                   <span className="block mt-2 text-stone-700 text-xs bg-stone-100 border border-stone-200 rounded-lg p-2.5">
-                    ✦ Atelier Vendor status active. You can now publish apparel listings.
+                     Atelier Vendor status active. You can now publish apparel listings.
                   </span>
                 )}
               </p>

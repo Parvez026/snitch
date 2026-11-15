@@ -14,13 +14,11 @@ import {
 import { Link, useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import { useAuth } from "../../auth/hooks/useAuth.js";
-import { useCart } from "../../cart/hooks/useCart.js";
 
 const Nav = () => {
   const cartItems = useSelector((state) => state.cart);
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
-  const { handleGetMyOrders } = useCart();
 
   const { handleLogout } = useAuth();
 
@@ -56,31 +54,6 @@ const Nav = () => {
     }
   };
 
-  const handleTrackOrder = async () => {
-  try {
-    const orders = await handleGetMyOrders();
-
-    // Latest successful order find karo
-    const latestOrder = orders.find(
-      (order) => order.status === "paid"
-    );
-
-    if (!latestOrder) {
-      alert("No successful orders found.");
-      return;
-    }
-
-    const orderId = latestOrder.razorpay.orderId;
-
-    navigate(`/order-success?order_id=${orderId}`);
-
-    setIsProfileOpen(false);
-
-  } catch (error) {
-    console.error("Track order error:", error);
-    alert("Unable to fetch your orders.");
-  }
-};
 
   return (
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#101010] text-white">
@@ -178,10 +151,10 @@ const Nav = () => {
                     {/* Track Order */}
                     <div className="border-b border-[#e5ddd3] p-2">
                       <button
-                        onClick={handleTrackOrder}
+                        onClick={() => navigate("/my-orders")}
                         className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-black transition hover:bg-gray-200/60"
                         >
-                          Track Order
+                          My Order
                       </button>
                     </div>
 
