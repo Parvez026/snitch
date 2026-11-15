@@ -128,3 +128,27 @@ export async function addProductVariant(req, res) {
     product
   })
 }
+
+export async function deleteProduct(req, res) {
+  const { productId } = req.params;
+  const seller = req.user;
+
+  const product = await productModel.findOneAndDelete({
+    _id: productId,
+    seller: seller.id,
+  });
+
+  if (!product) {
+    return res.status(404).json({
+      message: "Product not found",
+      success: false,
+    });
+  }
+
+  return res.status(200).json({
+    message: "Product deleted successfully",
+    success: true,
+  });
+}
+
+

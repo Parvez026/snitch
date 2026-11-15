@@ -22,7 +22,6 @@ handleGetCart()
   return (
     <>
        <RouterProvider router={Router}/>
-    <Footer/>
     </>
   )
 }

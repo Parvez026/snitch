@@ -32,7 +32,7 @@ const getDeliveryRange = () => {
 const OrderSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  
   const queryParams = useMemo(
     () => new URLSearchParams(location.search),
     [location.search]
@@ -74,6 +74,7 @@ const OrderSuccess = () => {
 
       try {
         const data = await handleGetOrderDetails(orderId);
+        console.log("Final Order Data:", data);
         setOrder(data);
       } catch (error) {
         console.error("Order fetch failed:", error);
@@ -114,7 +115,7 @@ const OrderSuccess = () => {
       </div>
     );
   }
-
+  
   /* Error State */
   if (orderError || !order) {
     return (

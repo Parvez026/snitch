@@ -18,7 +18,7 @@ const formatPrice = (price) => {
 };
 
 /* ─── Product Card with Multi-Image Preview ────────────────────────────── */
-const ProductCard = ({ product, onQuickView,navigate }) => {
+const ProductCard = ({ product,navigate,onDelete }) => {
   const [activeImgIndex, setActiveImgIndex] = useState(0);
 
   const images = Array.isArray(product?.images) && product.images.length > 0
@@ -43,7 +43,7 @@ const ProductCard = ({ product, onQuickView,navigate }) => {
     >
       {/* ── Top Media Area ── */}
       <div 
-      className="relative aspect-[4/5] bg-stone-100 overflow-hidden select-none">
+      className="relative aspect-[2.7/3] bg-stone-100 overflow-hidden select-none">
         <img
           src={currentImage}
           alt={product.title}
@@ -112,19 +112,39 @@ const ProductCard = ({ product, onQuickView,navigate }) => {
       <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between bg-white">
         <div>
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-syne font-bold text-base sm:text-lg text-stone-900 leading-snug line-clamp-1 group-hover:text-stone-700 transition">
+            <h3 className=" font-bold text-base sm:text-lg text-stone-900 leading-snug line-clamp-1 group-hover:text-stone-700 transition">
               {product.title || 'Untitled Design'}
             </h3>
             <span className=" font-extrabold text-base sm:text-lg text-stone-950 whitespace-nowrap">
               {formatPrice(product.price)}
             </span>
           </div>
-
-          <p className="text-xs text-stone-500 mt-1 line-clamp-2 leading-relaxed">
-            {product.description || 'No design notes provided.'}
-          </p>
         </div>
-
+        <div className="mt-4 pt-3 border-t border-stone-100">
+  <button
+    type="button"
+    onClick={(e) => {
+      e.stopPropagation();
+      onDelete(product);
+    }}
+    className="w-full h-10 flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 text-red-600 text-xs font-bold uppercase tracking-wider hover:bg-red-100 hover:border-red-300 transition-all duration-200 active:scale-[0.98]"
+  >
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16"
+      />
+    </svg>
+    Delete Product
+  </button>
+</div>
       </div>
     </div>
   );
@@ -206,12 +226,12 @@ const QuickViewModal = ({ product, onClose }) => {
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-2.5 py-0.5 rounded-full bg-stone-200 text-stone-700">
                 Snitch Atelier
               </span>
-            <h2 className="font-syne text-2xl sm:text-3xl font-extrabold text-stone-900">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900">
               {product.title}
             </h2>
             {/* Price tag */}
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="font-syne text-3xl font-bold text-stone-950">
+              <span className=" text-3xl font-bold text-stone-950">
                 {formatPrice(product.price)}
               </span>
               <span className="text-xs uppercase tracking-wider text-stone-400 font-semibold">
@@ -256,7 +276,7 @@ const QuickViewModal = ({ product, onClose }) => {
           <div className="mt-8 pt-5 border-t border-stone-200 flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex-1 h-12 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-syne font-bold text-xs uppercase tracking-wider transition shadow-sm active:scale-[0.99]"
+              className="flex-1 h-12 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs uppercase tracking-wider transition shadow-sm active:scale-[0.99]"
             >
               Close Window
             </button>
@@ -269,7 +289,7 @@ const QuickViewModal = ({ product, onClose }) => {
 
 /* ─── Main Dashboard Component ─────────────────────────────────────────── */
 const Dashboard = () => {
-  const { handleGetSellerProduct } = useProduct();
+  const { handleGetSellerProduct,handleDeleteProduct } = useProduct();
   const rawProducts = useSelector((state) => state.product.sellerProduct);
   const user = useSelector((state) => state.auth?.user);
   const navigate = useNavigate();
@@ -278,6 +298,8 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // newest, price-asc, price-desc, title-asc
   const [inspectingProduct, setInspectingProduct] = useState(null);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Safely extract products array from whatever structure is stored
   const products = useMemo(() => {
@@ -305,6 +327,27 @@ const Dashboard = () => {
       isMounted = false;
     };
   }, []);
+
+  const handleConfirmDelete = async () => {
+  if (!productToDelete || deleting) return;
+
+  try {
+    setDeleting(true);
+
+    await handleDeleteProduct(productToDelete._id);
+
+    setProductToDelete(null);
+  } catch (error) {
+    console.error("Product deletion failed:", error);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to delete product. Please try again."
+    );
+  } finally {
+    setDeleting(false);
+  }
+};
 
   // Filtered & Sorted products
   const filteredProducts = useMemo(() => {
@@ -358,22 +401,15 @@ const Dashboard = () => {
           {/* Brand Logo & Studio Tag */}
           <div className="flex items-center gap-3 sm:gap-4">
             <Link to="/" className="group flex items-center gap-2.5">
-              <span className="font-syne text-2xl sm:text-3xl font-extrabold tracking-[0.28em] text-stone-950 group-hover:text-stone-700 transition">
-                SNITCH
+              <span className=" text-2xl sm:text-3xl uppercase font-extrabold tracking-[0.28em] text-stone-950 group-hover:text-stone-700 transition">
+                Seller Catalog
               </span>
             </Link>
-            <span className="h-4 w-px bg-stone-300 hidden sm:block" />
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-2.5 py-1 rounded-full bg-stone-200/80 text-stone-700 border border-stone-300">
-                Seller Atelier
-              </span>
-            </div>
           </div>
-          
             {/* Create Product Button */}
             <button
               onClick={() => navigate('/seller/create-product')}
-              className="flex items-center gap-2 h-11 px-4 sm:px-5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-syne font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow active:scale-[0.98]"
+              className="flex items-center gap-2 h-11 px-4 sm:px-5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow active:scale-[0.98]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -385,31 +421,6 @@ const Dashboard = () => {
 
       {/* ── Main Dashboard Content ──────────────────────────────────── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        {/* Welcome & Overview Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-8 border-b border-stone-200">
-          <div>
-            <span className="text-[11px] uppercase tracking-[0.24em] font-semibold text-stone-400 block mb-1">
-              Merchandise Management
-            </span>
-            <h1 className="font-syne text-3xl sm:text-4xl font-extrabold text-stone-950 tracking-tight">
-              Seller Catalog
-            </h1>
-            <p className="text-sm text-stone-500 mt-1.5 max-w-xl">
-              Showcase, audit, and inspect your luxury menswear drops and wardrobe items listed on Snitch.
-            </p>
-          </div>
-
-          {/* Quick Status Tag */}
-          <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white border border-stone-200 shadow-sm self-start md:self-auto">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <div className="text-xs">
-              <span className="font-semibold text-stone-800 block leading-tight">Live Storefront</span>
-              <span className="text-[10px] text-stone-400">
-                {products.length} {products.length === 1 ? 'Design' : 'Designs'} Published
-              </span>
-            </div>
-          </div>
-        </div>
 
         {/* ── Top Metric Cards ──────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8">
@@ -548,7 +559,7 @@ const Dashboard = () => {
 
       {searchQuery ? (
         <>
-          <h3 className="font-syne font-bold text-lg text-stone-900">
+          <h3 className=" font-bold text-lg text-stone-900">
             No results for &ldquo;{searchQuery}&rdquo;
           </h3>
 
@@ -566,7 +577,7 @@ const Dashboard = () => {
         </>
       ) : (
         <>
-          <h3 className="font-syne font-bold text-lg text-stone-900">
+          <h3 className=" font-bold text-lg text-stone-900">
             No Products in Catalog
           </h3>
 
@@ -577,7 +588,7 @@ const Dashboard = () => {
 
           <button
             onClick={() => navigate("/seller/create-product")}
-            className="mt-6 px-6 h-11 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-syne font-bold text-xs uppercase tracking-wider transition shadow-sm"
+            className="mt-6 px-6 h-11 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs uppercase tracking-wider transition shadow-sm"
           >
             + Create Your First Design
           </button>
@@ -594,6 +605,9 @@ const Dashboard = () => {
         //   onQuickView={(p) => setInspectingProduct(p)}
         // onClick={()=>navigate(`/seller/products/${product._id}`)}
         navigate={navigate}
+         onDelete={(selectedProduct) =>
+        setProductToDelete(selectedProduct)
+    }
         />
       ))}
       </div>
@@ -608,6 +622,74 @@ const Dashboard = () => {
           onClose={() => setInspectingProduct(null)}
         />
       )}
+
+
+{productToDelete && (
+  <div
+    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    onClick={() => {
+      if (!deleting) setProductToDelete(null);
+    }}
+  >
+    <div
+      className="w-full max-w-md bg-[#FAFAF8] rounded-3xl shadow-2xl border border-stone-200 p-6 sm:p-8"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-red-600 mb-5">
+        <svg
+          className="w-7 h-7"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16"
+          />
+        </svg>
+      </div>
+
+      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-500">
+        Remove from catalog
+      </span>
+
+      <h2 className=" text-2xl font-extrabold text-stone-950 mt-2">
+        Delete this product?
+      </h2>
+
+      <p className="text-sm text-stone-500 mt-3 leading-relaxed">
+        Are you sure you want to delete{" "}
+        <span className="font-bold text-stone-800">
+          {productToDelete.title}
+        </span>
+        ? This action cannot be undone.
+      </p>
+
+      <div className="mt-7 flex gap-3">
+        <button
+          type="button"
+          disabled={deleting}
+          onClick={() => setProductToDelete(null)}
+          className="flex-1 h-12 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold uppercase tracking-wider hover:bg-stone-100 transition disabled:opacity-50"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          disabled={deleting}
+          onClick={handleConfirmDelete}
+          className="flex-1 h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider transition active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {deleting ? "Deleting..." : "Yes, Delete"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

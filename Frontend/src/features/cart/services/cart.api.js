@@ -53,3 +53,8 @@ export const getOrderDetails = async (orderId) => {
   const response = await cartAPI.get(`/order/${orderId}`);
   return response.data;
 };
+
+export const getMyOrders = async () => {
+  const response = await cartAPI.get("/my-orders");
+  return response.data;
+};

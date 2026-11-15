@@ -231,7 +231,7 @@ export const removeCartItem = async (req, res) => {
 };
 
 export const creteOrderController = async (req, res) => {
-   const userId = req.user._id;
+  const userId = req.user._id;
   const { addressId } = req.body;
 
   const address = await addressModel.findOne({
@@ -245,8 +245,6 @@ export const creteOrderController = async (req, res) => {
       success: false,
     });
   }
-
-
 
   const cart = await getCartDetails(req.user._id);
 
@@ -266,12 +264,12 @@ export const creteOrderController = async (req, res) => {
     razorpay: {
       orderId: order.id,
     },
-    price:{
-      amount:cart.totalPrice,
-      currency:cart.currency
+    price: {
+      amount: cart.totalPrice,
+      currency: cart.currency,
     },
 
-     shippingAddress: {
+    shippingAddress: {
       fullName: address.fullName,
       phone: address.phone,
       email: address.email,
@@ -283,18 +281,18 @@ export const creteOrderController = async (req, res) => {
       addressType: address.addressType,
     },
 
-    orderItems:cart.items.map((item)=>({
-      title:item.product.title,
-      productId:item.product._id,
-      variantId:item.variant,
-      quantity:item.quantity,
-      images:item.product.variants.images||item.product.images,
-      description:item.product.description,
-      price:{
-        amount:item.product.variants.price.amount||item.product.price.amount,
-        currency:item.product.variants.price.currency||item.price.currency
-      }
-    }))
+    orderItems: cart.items.map((item) => ({
+      title: item.product.title,
+      productId: item.product._id,
+      variantId: item.variant,
+      quantity: item.quantity,
+      images: item.product.variants.images || item.product.images,
+      description: item.product.description,
+      price: {
+        amount: item.product.variants.price.amount || item.product.price.amount,
+        currency: item.product.variants.price.currency || item.price.currency,
+      },
+    })),
   });
 
   return res.status(200).json({
@@ -305,51 +303,52 @@ export const creteOrderController = async (req, res) => {
 };
 
 export const verifyOrderController = async (req, res) => {
-    const {
-        razorpay_order_id,
-        razorpay_payment_id,
-        razorpay_signature
-    } = req.body
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+    req.body;
 
-    const payment = await paymentModel.findOne({
-        "razorpay.orderId": razorpay_order_id,
-        status: "pending"
-    })
+  const payment = await paymentModel.findOne({
+    "razorpay.orderId": razorpay_order_id,
+    status: "pending",
+  });
 
-    if (!payment) {
-        return res.status(400).json({
-            message: "Payment not found",
-            success: false
-        })
-    }
+  if (!payment) {
+    return res.status(400).json({
+      message: "Payment not found",
+      success: false,
+    });
+  }
 
-    const isPaymentValid = validatePaymentVerification({
-        order_id: razorpay_order_id,
-        payment_id: razorpay_payment_id,
-    }, razorpay_signature, config.RAZORPAY_KEY_SECRET)
+  const isPaymentValid = validatePaymentVerification(
+    {
+      order_id: razorpay_order_id,
+      payment_id: razorpay_payment_id,
+    },
+    razorpay_signature,
+    config.RAZORPAY_KEY_SECRET,
+  );
 
-    if (!isPaymentValid) {
-        payment.status = "failed"
-        await payment.save()
+  if (!isPaymentValid) {
+    payment.status = "failed";
+    await payment.save();
 
-        return res.status(400).json({
-            message: "Payment verification failed",
-            success: false
-        })
-    }
+    return res.status(400).json({
+      message: "Payment verification failed",
+      success: false,
+    });
+  }
 
-    payment.status = "paid"
+  payment.status = "paid";
 
-    payment.razorpay.paymentId = razorpay_payment_id
-    payment.razorpay.signature = razorpay_signature
+  payment.razorpay.paymentId = razorpay_payment_id;
+  payment.razorpay.signature = razorpay_signature;
 
-    await payment.save()
+  await payment.save();
 
-    return res.status(200).json({
-        message: "Payment verified successfully",
-        success: true
-    })
-}
+  return res.status(200).json({
+    message: "Payment verified successfully",
+    success: true,
+  });
+};
 
 export const getOrderDetailsController = async (req, res) => {
   try {
@@ -381,4 +380,18 @@ export const getOrderDetailsController = async (req, res) => {
       success: false,
     });
   }
+};
+
+export const getMyOrdersController = async (req, res) => {
+  const userId = req.user._id;
+
+  const orders = await paymentModel
+    .find({ user: userId })
+    .sort({ createdAt: -1 });
+
+  return res.status(200).json({
+    message: "Orders fetched successfully",
+    success: true,
+    orders,
+  });
 };

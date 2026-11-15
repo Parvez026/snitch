@@ -7,9 +7,7 @@ import { useNavigate } from "react-router";
 import { useRazorpay } from "react-razorpay";
 
 const Checkout = () => {
-  const addresses = useSelector(
-    (state) => state.address.addresses
-  );
+  const addresses = useSelector((state) => state.address.addresses);
 
   const { handleGetAllAddress } = useAddress();
   const {handleCreteCartOrder,handleVerifyCartOrder} = useCart();
@@ -50,9 +48,7 @@ const Checkout = () => {
     }
   }, [addresses, selectedAddressId]);
 
-  const selectedAddress = addresses.find(
-    (address) => address._id === selectedAddressId
-  );
+  const selectedAddress = addresses.find((address) => address._id === selectedAddressId);
 
   const handlePayment = async () => {
   if (!selectedAddressId) {
@@ -79,7 +75,7 @@ const Checkout = () => {
       handler: async (response) => {
         try {
           const isValid = await handleVerifyCartOrder(response);
-
+           console.log("Verification Result:", isValid);
           if (isValid) {
             navigate(
               `/order-success?order_id=${response.razorpay_order_id}`
@@ -145,6 +141,14 @@ const Checkout = () => {
             <p className="text-sm text-gray-400 mt-2">
               Please add an address before checkout.
             </p>
+
+            <button
+            onClick={() => navigate("/address")}
+            className="mt-3 text-sm text-blue-600 hover:underline"
+            >
+              Add Address
+            </button>
+
           </div>
         ) : (
           <div className="space-y-4">

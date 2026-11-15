@@ -8,6 +8,7 @@ import {
   createCartOrder,
   verifyCartOrder,
   getOrderDetails,
+  getMyOrders,
 } from "../services/cart.api"
 import {
   setItem,
@@ -28,7 +29,6 @@ export const useCart = () => {
 
   async function handleGetCart() {
     const data = await getCart()
-    console.log(data.cart)
      dispatch(setItem(data.cart))
   }
 
@@ -61,10 +61,15 @@ export const useCart = () => {
         return data.success
   }
 
-  async function handleGetOrderDetails(orderId) {
-  const data = await getOrderDetails(orderId);
-  return data.order;
-  }
+ async function handleGetOrderDetails(orderId) {
+    const data = await getOrderDetails(orderId);
+    return data.order;
+}
+
+async function handleGetMyOrders() {
+    const data = await getMyOrders();
+    return data.orders;
+}
 
   return {
     handleAddItem,
@@ -74,6 +79,7 @@ export const useCart = () => {
     handleRemoveItem,
     handleCreteCartOrder,
     handleVerifyCartOrder,
-    handleGetOrderDetails
+    handleGetOrderDetails,
+    handleGetMyOrders,
   }
 }

@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux"
-import { addProductVariant, createProduct, getAllProducts, getProductById, getSellerProduct } from "../services/product.api"
-import { setProducts, setSellerProduct } from "../state/product.slice"
+import { addProductVariant, createProduct, deleteProductApi, getAllProducts, getProductById, getSellerProduct } from "../services/product.api"
+import { removeSellerProduct, setProducts, setSellerProduct } from "../state/product.slice"
 
 
 
@@ -42,8 +42,24 @@ const handleAddProductVariants=async(productId,newProductVariant)=>{
     return data
 }
 
+const handleDeleteProduct = async (productId) => {
+    const data = await deleteProductApi(productId);
+
+    if (data.success) {
+      dispatch(removeSellerProduct(productId));
+    }
+
+    return data;
+  };
+
+
 return {
- handleCreateProduct,handleGetSellerProduct,handleGetAllProducts,handleGetProductById,handleAddProductVariants
+ handleCreateProduct,
+ handleGetSellerProduct,
+ handleGetAllProducts,
+ handleGetProductById,
+ handleAddProductVariants,
+ handleDeleteProduct
 }
 
 }
