@@ -412,11 +412,140 @@ const Dashboard = () => {
 
             </section>
 
+                {/* PRODUCTS SECTION */}
+
+            <section id="products-section" className="scroll-mt-24">
+
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">  
+                  <h2 className="text-2xl sm:text-3xl font-black mt-1">
+                    Your Products
+                  </h2>  
+
+                <p className="text-xs text-stone-400 font-semibold">
+                  {filteredProducts.length} Products
+                </p>
+              </div>
+
+              {/* Search and sorting */}
+
+              <div className="bg-white border border-stone-200 rounded-xl p-3 flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                  />
+                  <input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search products..."
+                    className="w-full h-10 pl-10 pr-4 text-xs outline-none"
+                  />
+                </div>
+
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="h-10 px-3 bg-[#F7F6F3] rounded-lg text-xs font-semibold outline-none"
+                >
+                  <option value="newest">Default Sorting</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="title-asc">Name: A to Z</option>
+                </select>
+              </div>
+
+              {/* Product grid */}
+
+              <div className="mt-6">
+                {loading ? (
+                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map((item) => (
+                      <div
+                        key={item}
+                        className="h-72 bg-white rounded-2xl animate-pulse"
+                      />
+                    ))}
+                  </div>
+                ) : filteredProducts.length === 0 ? (
+                  <div className="bg-white border border-stone-200 rounded-2xl py-16 text-center">
+                    <ImageIcon
+                      size={28}
+                      className="mx-auto text-stone-300"
+                    />
+                    <h3 className="font-bold mt-4">
+                      {searchQuery ? "No products found" : "Your catalog is empty"}
+                    </h3>
+                    <p className="text-xs text-stone-400 mt-2">
+                      {searchQuery
+                        ? "Try a different search."
+                        : "Add your first product to get started."}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+                    {filteredProducts.map((product) => {
+                      const image =
+                        product.images?.[0]?.url ||
+                        "/placeholder-image.jpg";
+
+                      return (
+                        <article
+                          key={product._id}
+                          className="group bg-white border border-stone-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300"
+                        >
+                          <div className="relative aspect-[3/4] bg-[#EFEEE9] overflow-hidden">
+                            <img
+                              src={image}
+                              alt={product.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+
+                            <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1.5 rounded-md text-[9px] font-bold text-stone-700">
+                              {product.images?.length || 0} PHOTOS
+                            </span>
+
+                            <button
+                              onClick={() => setProductToDelete(product)}
+                              className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/95 text-red-500 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition hover:bg-red-50"
+                              title="Delete product"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+
+                          <div className="p-3 sm:p-4">
+                            <h3 className="text-xs sm:text-sm font-bold truncate">
+                              {product.title}
+                            </h3>
+
+                            <div className="flex items-center justify-between gap-2 mt-3">
+                              <p className="text-sm font-black">
+                                {formatPrice(product.price)}
+                              </p>
+
+                              <button
+                                onClick={() =>
+                                  navigate(`/seller/product/${product._id}`)
+                                }
+                                className="text-[9px] uppercase tracking-wider font-bold text-[#927958] flex items-center gap-1 hover:text-stone-900"
+                              >
+                                View <ArrowUpRight size={12} />
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </section>
+
             {/* ORDERS SECTION */}
 
             <section id="orders-section" className="mb-14 scroll-mt-24">
 
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+              <div className="flex flex-col mt-10 sm:flex-row sm:items-end justify-between gap-4 mb-6">
                   <h2 className="text-2xl sm:text-3xl font-black mt-1">
                     Recent Orders
                   </h2>
@@ -650,134 +779,7 @@ const Dashboard = () => {
               )}
             </section>
 
-            {/* PRODUCTS SECTION */}
-
-            <section id="products-section" className="scroll-mt-24">
-
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">  
-                  <h2 className="text-2xl sm:text-3xl font-black mt-1">
-                    Your Products
-                  </h2>  
-
-                <p className="text-xs text-stone-400 font-semibold">
-                  {filteredProducts.length} Products
-                </p>
-              </div>
-
-              {/* Search and sorting */}
-
-              <div className="bg-white border border-stone-200 rounded-xl p-3 flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Search
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
-                  />
-                  <input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products..."
-                    className="w-full h-10 pl-10 pr-4 text-xs outline-none"
-                  />
-                </div>
-
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="h-10 px-3 bg-[#F7F6F3] rounded-lg text-xs font-semibold outline-none"
-                >
-                  <option value="newest">Default Sorting</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                  <option value="title-asc">Name: A to Z</option>
-                </select>
-              </div>
-
-              {/* Product grid */}
-
-              <div className="mt-6">
-                {loading ? (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {[1, 2, 3, 4].map((item) => (
-                      <div
-                        key={item}
-                        className="h-72 bg-white rounded-2xl animate-pulse"
-                      />
-                    ))}
-                  </div>
-                ) : filteredProducts.length === 0 ? (
-                  <div className="bg-white border border-stone-200 rounded-2xl py-16 text-center">
-                    <ImageIcon
-                      size={28}
-                      className="mx-auto text-stone-300"
-                    />
-                    <h3 className="font-bold mt-4">
-                      {searchQuery ? "No products found" : "Your catalog is empty"}
-                    </h3>
-                    <p className="text-xs text-stone-400 mt-2">
-                      {searchQuery
-                        ? "Try a different search."
-                        : "Add your first product to get started."}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
-                    {filteredProducts.map((product) => {
-                      const image =
-                        product.images?.[0]?.url ||
-                        "/placeholder-image.jpg";
-
-                      return (
-                        <article
-                          key={product._id}
-                          className="group bg-white border border-stone-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300"
-                        >
-                          <div className="relative aspect-[3/4] bg-[#EFEEE9] overflow-hidden">
-                            <img
-                              src={image}
-                              alt={product.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-
-                            <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1.5 rounded-md text-[9px] font-bold text-stone-700">
-                              {product.images?.length || 0} PHOTOS
-                            </span>
-
-                            <button
-                              onClick={() => setProductToDelete(product)}
-                              className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/95 text-red-500 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition hover:bg-red-50"
-                              title="Delete product"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-
-                          <div className="p-3 sm:p-4">
-                            <h3 className="text-xs sm:text-sm font-bold truncate">
-                              {product.title}
-                            </h3>
-
-                            <div className="flex items-center justify-between gap-2 mt-3">
-                              <p className="text-sm font-black">
-                                {formatPrice(product.price)}
-                              </p>
-
-                              <button
-                                onClick={() =>
-                                  navigate(`/seller/product/${product._id}`)
-                                }
-                                className="text-[9px] uppercase tracking-wider font-bold text-[#927958] flex items-center gap-1 hover:text-stone-900"
-                              >
-                                View <ArrowUpRight size={12} />
-                              </button>
-                            </div>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </section>
+        
 
           </div>
         </main>

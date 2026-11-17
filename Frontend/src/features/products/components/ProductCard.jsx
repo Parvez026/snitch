@@ -1,136 +1,153 @@
-import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
-import React, { useState } from 'react'
 
+import React, { useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+} from "lucide-react";
 
-const ProductCard = ({ product,navigate }) => {
+const ProductCard = ({ product, navigate }) => {
   const [activeImage, setActiveImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const images = product.images || [];
+  const images = Array.isArray(product?.images)
+    ? product.images.filter((image) => image?.url)
+    : [];
+
+  const openProduct = () => {
+    if (product?._id) {
+      navigate(`/product/${product._id}`);
+    }
+  };
 
   const changeImage = (direction) => {
-    if (!images.length) return;
+    if (images.length <= 1) return;
 
-    setActiveImage((prev) =>
-      (prev + direction + images.length) % images.length
+    setActiveImage(
+      (prev) => (prev + direction + images.length) % images.length
     );
   };
 
+  const formatPrice = () => {
+    const amount = Number(product?.price?.amount);
+
+    if (!Number.isFinite(amount)) return "Price unavailable";
+
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: product?.price?.currency || "INR",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
- <article className="group h-full">
-  <div className="overflow-hidden rounded-2xl border border-[#e5ddd3] bg-[#fbf9f6] p-2.5 transition-all duration-300 hover:border-[#c9b8a5]">
+    <article className="group min-w-0">
 
-    {/* Image Section */}
-    <div className="relative overflow-hidden rounded-xl bg-[#f2efec]">
+      {/* Product Image */}
+      <div className="relative overflow-hidden rounded-xl bg-[#f0efec]">
 
-      {/* Main Image */}
-      <div
-        onClick={() => navigate(`/product/${product._id}`)}
-        className="aspect-[3/3.5] cursor-pointer overflow-hidden"
-      >
-        {images[activeImage]?.url ? (
-          <img
-            src={images[activeImage].url}
-            alt={product.title}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+        <button
+          type="button"
+          onClick={openProduct}
+          className="block aspect-[3/4] w-full overflow-hidden"
+          aria-label={`View ${product?.title || "product"}`}
+        >
+          {images.length > 0 ? (
+            <img
+              src={images[activeImage]?.url}
+              alt={product?.title || "Product"}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-xs tracking-widest text-gray-400">
+              NO IMAGE
+            </div>
+          )}
+        </button>
+
+        {/* Wishlist */}
+        <button
+          type="button"
+          onClick={() => setIsWishlisted((prev) => !prev)}
+          aria-label="Toggle wishlist"
+          aria-pressed={isWishlisted}
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-sm transition hover:scale-110"
+        >
+          <Heart
+            size={17}
+            strokeWidth={1.7}
+            className={
+              isWishlisted
+                ? "fill-red-500 text-red-500"
+                : "text-[#222]"
+            }
           />
-        ) : (
-          <div className="flex h-full items-center justify-center text-sm text-gray-400">
-            No Image Available
+        </button>
+
+        {/* Image Navigation */}
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => changeImage(-1)}
+              aria-label="Previous image"
+              className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black opacity-0 shadow-sm transition group-hover:opacity-100"
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => changeImage(1)}
+              aria-label="Next image"
+              className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black opacity-0 shadow-sm transition group-hover:opacity-100"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </>
+        )}
+
+        {/* Image Thumbnails */}
+        {images.length > 1 && (
+          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+            {images.map((image, index) => (
+              <button
+                key={image._id || index}
+                type="button"
+                onClick={() => setActiveImage(index)}
+                aria-label={`Select image ${index + 1}`}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  activeImage === index
+                    ? "w-5 bg-white"
+                    : "w-2 bg-white/60 hover:bg-white"
+                }`}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* Image Count */}
-      {images.length > 1 && (
-        <div className="absolute left-3 top-3 rounded-full bg-black/60 px-3 py-1.5 text-[11px] text-white backdrop-blur">
-          {activeImage + 1} / {images.length}
-        </div>
-      )}
-
-      {/* Wishlist */}
-      <button
-        onClick={() => setIsWishlisted(!isWishlisted)}
-        aria-label="Add to wishlist"
-        className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:scale-110"
-      >
-        <Heart
-          size={18}
-          className={
-            isWishlisted
-              ? "fill-red-500 text-red-500"
-              : "text-[#171717]"
-          }
-        />
-      </button>
-
-      {/* Image Navigation */}
-      {images.length > 1 && (
-        <>
+      {/* Product Details */}
+      <div className="px-0.5 pt-3 flex items-center justify-between ">
           <button
-            onClick={() => changeImage(-1)}
-            aria-label="Previous image"
-            className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black opacity-0 transition-all hover:bg-white group-hover:opacity-100"
+            type="button"
+            onClick={openProduct}
+            className="min-w-0 text-left"
           >
-            <ChevronLeft size={20} />
+            <h3 className="line-clamp-2 text-[13px] font-medium leading-5 text-[#222] transition-colors group-hover:text-gray-500 sm:text-sm">
+              {product?.title || "Untitled Product"}
+            </h3>
           </button>
-
-          <button
-            onClick={() => changeImage(1)}
-            aria-label="Next image"
-            className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black opacity-0 transition-all hover:bg-white group-hover:opacity-100"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </>
-      )}
-
-      {/* Image Thumbnails */}
-      {images.length > 1 && (
-        <div className="absolute bottom-3 left-3 right-3 flex gap-2 overflow-x-auto scrollbar-hide">
-          {images.map((image, index) => (
-            <button
-              key={image._id || index}
-              onClick={() => setActiveImage(index)}
-              aria-label={`View image ${index + 1}`}
-              className={`h-11 w-11 shrink-0 overflow-hidden rounded-lg border-2 bg-white transition-all ${
-                activeImage === index
-                  ? "scale-105 border-white shadow-md"
-                  : "border-white/60 opacity-75 hover:opacity-100"
-              }`}
-            >
-              <img
-                src={image.url}
-                alt={`${product.title} view ${index + 1}`}
-                className="h-full w-full object-cover"
-              />
-            </button>
-          ))}
+        <div className="mt-1.5 flex items-center justify-between">
+          <p className="text-sm font-semibold text-[#171717] sm:text-[15px]">
+            {formatPrice()}
+          </p>
         </div>
-      )}
-    </div>
 
-    {/* Product Details — inside the same card */}
-    <div className="px-2 pt-2">
-      {/* Title and Price */}
-      <div className="flex flex-col gap-2">
-        <h3
-          onClick={() => navigate(`/product/${product._id}`)}
-          className="cursor-pointer text-sm font-medium leading-5 text-[#171717] hover:text-gray-500 md:text-base"
-        >
-          {product.title}
-        </h3>
-
-        <p className="shrink-0 text-sm font-semibold text-[#171717] md:text-base">
-          {product.price?.currency === "INR" ? "₹" : ""}
-          {product.price?.amount?.toLocaleString("en-IN")}
-        </p>
       </div>
-    </div>
-  </div>
-</article>
+    </article>
   );
 };
 
-export default ProductCard
+export default ProductCard;

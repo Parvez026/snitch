@@ -1,44 +1,107 @@
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router';
-import { useSelector } from 'react-redux';
-import { useProduct } from '../../products/hooks/useProduct';
+import React, { useEffect, useState, useMemo } from "react";
+import { useLocation, useNavigate, Link } from "react-router";
+import { useSelector } from "react-redux";
+import { useProduct } from "../../products/hooks/useProduct";
 import { useCart } from "../hooks/useCart";
 
-/* Currency Formatter */
-const sym = {
-  INR: '₹',
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
+import {
+  Check,
+  Copy,
+  ArrowRight,
+  Package,
+  MapPin,
+  CreditCard,
+  Truck,
+  Clock3,
+  CheckCircle2,
+  Printer,
+  Headphones,
+} from "lucide-react";
+
+/* -------------------- Helpers -------------------- */
+
+const formatPrice = (price) => {
+  const amount = price?.amount ?? price ?? 0;
+  const currency = price?.currency || "INR";
+
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(amount);
 };
 
-const fmt = (amount, currency = 'INR') =>
-  `${sym[currency] || currency + ' '}${Number(amount || 0).toLocaleString('en-IN')}`;
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
 
-/* Estimated Delivery Date */
 const getDeliveryRange = () => {
-  const options = { weekday: 'short', month: 'short', day: 'numeric' };
   const start = new Date();
   start.setDate(start.getDate() + 3);
 
   const end = new Date();
   end.setDate(end.getDate() + 5);
 
-  return `${start.toLocaleDateString('en-IN', options)} — ${end.toLocaleDateString('en-IN', options)}`;
+  return `${start.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+  })} - ${end.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+  })}`;
 };
 
-/* Main Order Success Page */
+/* -------------------- Tracking Steps -------------------- */
+
+const trackingSteps = [
+  {
+    status: "confirmed",
+    label: "Order Confirmed",
+    description: "Your order has been confirmed.",
+    icon: CheckCircle2,
+  },
+  {
+    status: "processing",
+    label: "Processing",
+    description: "Your items are being prepared.",
+    icon: Package,
+  },
+  {
+    status: "shipped",
+    label: "Shipped",
+    description: "Your order is on its way.",
+    icon: Truck,
+  },
+  {
+    status: "delivered",
+    label: "Delivered",
+    description: "Your order has been delivered.",
+    icon: Check,
+  },
+];
+
+const statusOrder = [
+  "confirmed",
+  "processing",
+  "shipped",
+  "delivered",
+];
+
+/* -------------------- Main Component -------------------- */
+
 const OrderSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
-  const queryParams = useMemo(
-    () => new URLSearchParams(location.search),
+
+  const orderId = useMemo(
+    () => new URLSearchParams(location.search).get("order_id"),
     [location.search]
   );
-
-  const orderId = queryParams.get("order_id");
 
   const allProducts =
     useSelector((state) => state.product?.products) || [];
@@ -53,18 +116,21 @@ const OrderSuccess = () => {
 
   const deliveryRange = useMemo(() => getDeliveryRange(), []);
 
-  /* Fetch Recommended Products */
+  /* Fetch Recommendations */
   useEffect(() => {
     handleGetAllProducts();
   }, []);
 
   const recommendations = useMemo(() => {
     if (!Array.isArray(allProducts)) return [];
+
     return allProducts.slice(0, 4);
   }, [allProducts]);
 
-  /* Fetch Actual Order Details */
+  /* Fetch Order */
   useEffect(() => {
+    let isMounted = true;
+
     const fetchOrder = async () => {
       if (!orderId) {
         setOrderError("Order ID not found");
@@ -74,310 +140,418 @@ const OrderSuccess = () => {
 
       try {
         const data = await handleGetOrderDetails(orderId);
-        console.log("Final Order Data:", data);
-        setOrder(data);
+
+        if (isMounted) {
+          setOrder(data);
+        }
       } catch (error) {
         console.error("Order fetch failed:", error);
 
-        setOrderError(
-          error.response?.data?.message ||
-          "Unable to fetch order details"
-        );
+        if (isMounted) {
+          setOrderError(
+            error.response?.data?.message ||
+              "Unable to fetch order details"
+          );
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchOrder();
+
+    return () => {
+      isMounted = false;
+    };
   }, [orderId]);
 
   /* Copy Order ID */
-  const handleCopyId = () => {
-    if (navigator?.clipboard?.writeText && order?.razorpay?.orderId) {
-      navigator.clipboard.writeText(order.razorpay.orderId);
+  const handleCopyId = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        order.razorpay?.orderId || ""
+      );
+
       setCopied(true);
+
       setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Copy failed:", error);
     }
   };
 
-  /* Print Receipt */
+  /* Print */
   const handlePrint = () => {
     window.print();
   };
 
-  /* Loading State */
+  /* Loading */
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8]">
-        <p className="text-sm font-medium text-stone-600">
-          Loading your order details...
-        </p>
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f7f4]">
+        <div className="text-center">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
+
+          <p className="mt-4 text-xs tracking-widest uppercase text-stone-500">
+            Loading your order
+          </p>
+        </div>
       </div>
     );
   }
-  
-  /* Error State */
+
+  /* Error */
   if (orderError || !order) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#FAFAF8]">
-        <h2 className="text-xl font-bold text-stone-900">
-          Unable to load order
-        </h2>
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f7f4] px-5">
+        <div className="max-w-md text-center">
+          <Package className="mx-auto h-10 w-10 text-stone-400" />
 
-        <p className="text-sm text-stone-500">
-          {orderError || "Order details not available"}
-        </p>
+          <h2 className="mt-5 text-2xl font-semibold text-stone-900">
+            Unable to load order
+          </h2>
 
-        <Link to="/" className="underline text-sm">
-          Back to Home
-        </Link>
+          <p className="mt-2 text-sm text-stone-500">
+            {orderError || "Order details not available"}
+          </p>
+
+          <Link
+            to="/my-orders"
+            className="mt-7 inline-flex items-center gap-2 bg-stone-900 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-white"
+          >
+            My Orders <ArrowRight size={15} />
+          </Link>
+        </div>
       </div>
     );
   }
 
-  /* Dynamic Order Tracking */
-  const orderSteps = [
-    {
-      step: "01",
-      status: "confirmed",
-      label: "Order Confirmed",
-      sub: "Your order has been confirmed",
-    },
-    {
-      step: "02",
-      status: "processing",
-      label: "Processing",
-      sub: "Your order is being prepared",
-    },
-    {
-      step: "03",
-      status: "shipped",
-      label: "Shipped",
-      sub: "Your order is on the way",
-    },
-    {
-      step: "04",
-      status: "delivered",
-      label: "Delivered",
-      sub: "Order delivered successfully",
-    },
-  ];
+  const currentStatusIndex = statusOrder.indexOf(
+    order.orderStatus
+  );
 
-  const statusOrder = [
-    "pending",
-    "confirmed",
-    "processing",
-    "shipped",
-    "delivered",
-  ];
-
-  const currentStatusIndex = statusOrder.indexOf(order.orderStatus);
+  const isCancelled = order.orderStatus === "cancelled";
+  const isPending = order.orderStatus === "pending";
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-[#171717] antialiased selection:bg-[#171717] selection:text-white print:bg-white print:text-black">
+    <div className="min-h-screen bg-[#f8f7f4] text-[#171717] print:bg-white">
 
       {/* Breadcrumb */}
-      <div className="border-b border-[#e5ddd3] bg-white/70 backdrop-blur-md print:hidden">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-3.5 flex items-center justify-between text-xs text-[#82776d]">
-          <div className="flex items-center gap-2 tracking-wider uppercase text-[10px] font-semibold">
-            <Link to="/" className="hover:text-[#171717] transition-colors">
-              Snitch
-            </Link>
-            <span>/</span>
-            <Link to="/cart" className="hover:text-[#171717] transition-colors">
-              Bag
-            </Link>
-            <span>/</span>
-            <span className="text-[#171717]">Order Receipt</span>
-          </div>
+      <div className="border-b border-stone-200 bg-white print:hidden">
+        <div className="mx-auto flex max-w-6xl items-center px-5 py-4 sm:px-8">
+          <Link
+            to="/"
+            className="text-[11px] font-black tracking-[0.3em]"
+          >
+            SNITCH<span className="text-stone-400">.</span>
+          </Link>
+
+          <span className="mx-3 text-stone-300">/</span>
+
+          <span className="text-[10px] uppercase tracking-widest text-stone-500">
+            Order Details
+          </span>
         </div>
       </div>
 
-      <main className="max-w-4xl mx-auto px-5 sm:px-8 py-7 sm:py-10">
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-8 sm:py-12">
 
-        {/* Main Confirmation Card */}
-        <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+        {/* Success Header */}
+        <section className="mb-8 rounded-2xl bg-[#171717] px-6 py-8 text-white sm:px-10 sm:py-10">
 
-          {/* Header */}
-          <div className="bg-black text-white px-6 py-5 md:px-8 md:py-6 relative overflow-hidden">
-            <div className="absolute -right-16 -top-24 h-72 w-72 rounded-full border border-white/10" />
-            <div className="absolute -right-5 -top-12 h-52 w-52 rounded-full border border-white/10" />
+          <div className="flex flex-col gap-7 sm:flex-row sm:items-center sm:justify-between">
 
-            <div className="relative z-10">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black tracking-[0.35em]">
-                  SNITCH<span className="text-stone-500">.</span>
-                </span>
+            <div>
+              <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-400">
+                {order.status === "paid"
+                  ? "Payment Successful"
+                  : `Payment ${order.status}`}
+              </p>
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                Thank you for your order.
+              </h1>
+            </div>
 
-                <span className="rounded-full border border-white/20 px-3 py-1.5 text-[9px] uppercase tracking-[0.2em] text-stone-300">
-                  Order Confirmation
-                </span>
+            <div className="sm:min-w-[210px] sm:text-right">
+              <p className="text-[9px] uppercase tracking-[0.25em] text-stone-500">
+                Order Reference
+              </p>
+              <p className="mt-2 break-all font-mono text-xs text-stone-200">
+                {order.razorpay?.orderId}
+              </p>
+              <button
+                onClick={handleCopyId}
+                className="mt-3 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-stone-300 transition hover:text-white print:hidden"
+              >
+                {copied ? (
+                  <>
+                    <Check size={13} /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy size={13} /> Copy Reference
+                  </>
+                )}
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+        {/* Order Summary */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+          <div className="rounded-xl border border-stone-200 bg-white p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100">
+                <CreditCard size={17} />
               </div>
 
-              <div className="mt-7 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
-                <div>
-                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-400/10">
-                    <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-widest text-stone-400">
+                  Payment
+                </p>
 
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-400">
-                    Payment Successfully Verified
-                  </p>
-                  <p className="mt-3 max-w-md text-xs leading-relaxed text-stone-400">
-                    Thank you for choosing SNITCH. Your order is confirmed
-                    and we're getting things ready for you.
-                  </p>
-                </div>
-
-                <div className="sm:text-right">
-                  <p className="text-[9px] uppercase tracking-[0.25em] text-stone-500">
-                    Order Reference
-                  </p>
-
-                  <p className="mt-2 break-all font-mono text-xs text-stone-200">
-                    {order.razorpay?.orderId}
-                  </p>
-
-                  <button
-                    onClick={handleCopyId}
-                    className="mt-3 text-[10px] cursor-pointer font-semibold uppercase tracking-widest text-emerald-400 hover:text-emerald-300 print:hidden"
-                  >
-                    {copied ? "Copied!" : "Copy Order ID"}
-                  </button>
-                </div>
+                <p className="mt-1 text-sm font-semibold capitalize">
+                  {order.status}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Order Information */}
-          <div className="px-5 py-6 sm:px-8 sm:py-7">
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-
-              <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                  Payment Status
-                </p>
-
-                <div className="mt-2 flex items-center gap-2">
-                  <span className={`h-2 w-2 rounded-full ${
-                    order.status === "paid"
-                      ? "bg-emerald-500"
-                      : order.status === "pending"
-                      ? "bg-amber-500"
-                      : "bg-red-500"
-                  }`} />
-
-                  <span className="text-sm font-semibold capitalize text-stone-900">
-                    {order.status}
-                  </span>
-                </div>
+          <div className="rounded-xl border border-stone-200 bg-white p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100">
+                <Clock3 size={17} />
               </div>
 
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                  Delivery Estimate
+                <p className="text-[9px] uppercase tracking-widest text-stone-400">
+                  Order Date
                 </p>
 
-                <p className="mt-2 text-sm font-semibold text-stone-900">
+                <p className="mt-1 text-sm font-semibold">
+                  {formatDate(order.createdAt)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-stone-200 bg-white p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100">
+                <Truck size={17} />
+              </div>
+
+              <div>
+                <p className="text-[9px] uppercase tracking-widest text-stone-400">
+                  Estimated Delivery
+                </p>
+
+                <p className="mt-1 text-sm font-semibold">
                   {deliveryRange}
                 </p>
               </div>
+            </div>
+          </div>
 
-              <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                  Payment Method
-                </p>
+        </section>
 
-                <p className="mt-2 text-sm font-semibold text-stone-900">
-                  Razorpay
-                </p>
-              </div>
+        {/* Order Tracking */}
+        <section className="mt-6 rounded-2xl border border-stone-200 bg-white p-5 sm:p-8">
 
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-stone-400">
+                Delivery Updates
+              </p>
+
+              <h2 className="mt-2 text-xl font-semibold tracking-tight">
+                Order Progress
+              </h2>
             </div>
 
-            {/* Divider */}
-            <div className="my-6 border-t border-dashed border-stone-200" />
+            <span
+              className={`rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-wider ${
+                isCancelled
+                  ? "bg-red-50 text-red-700"
+                  : "bg-stone-100 text-stone-800"
+              }`}
+            >
+              {order.orderStatus || "Pending"}
+            </span>
+          </div>
 
-          
-{/* Seller-wise Order Tracking */}
-  <div>
-  <div className="mb-5">
-    <h2 className="text-xl font-semibold tracking-tight text-stone-900">
-      Order Progress
-    </h2>
+          {isCancelled ? (
+            <div className="mt-8 rounded-xl border border-red-100 bg-red-50 p-5">
+              <h3 className="text-sm font-semibold text-red-800">
+                This order has been cancelled.
+              </h3>
 
-    <p className="mt-1 text-xs text-stone-500">
-      Track delivery updates for each seller separately.
-    </p>
-  </div>
+              <p className="mt-1 text-xs text-red-600">
+                Please contact customer support if you need assistance.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-9">
 
-  {order.sellerOrders?.length > 0 ? (
-    <div className="space-y-5">
-      {order.sellerOrders.map((sellerOrder, index) => {
-        const steps = [
-          {
-            status: "confirmed",
-            label: "Confirmed",
-            sub: "Order confirmed",
-          },
-          {
-            status: "processing",
-            label: "Processing",
-            sub: "Preparing your order",
-          },
-          {
-            status: "shipped",
-            label: "Shipped",
-            sub: "On the way",
-          },
-          {
-            status: "delivered",
-            label: "Delivered",
-            sub: "Successfully delivered",
-          },
-        ];
+              {/* Desktop Timeline */}
+              <div className="hidden sm:block">
+                <div className="relative grid grid-cols-4">
 
-        const statusOrder = [
-          "confirmed",
-          "processing",
-          "shipped",
-          "delivered",
-        ];
+                  <div className="absolute left-[12.5%] right-[12.5%] top-5 h-[2px] bg-stone-200" />
 
-        const currentIndex = statusOrder.indexOf(
-          sellerOrder.orderStatus
-        );
+                  <div
+                    className="absolute left-[12.5%] top-5 h-[2px] bg-stone-900 transition-all duration-500"
+                    style={{
+                      width:
+                        currentStatusIndex < 0
+                          ? "0%"
+                          : `${(currentStatusIndex / 3) * 75}%`,
+                    }}
+                  />
 
-        return (
-          <div
-            key={sellerOrder._id || index}
-            className="rounded-xl border border-stone-200 bg-[#faf9f7] p-4 sm:p-5"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                  Seller Order {index + 1}
-                </p>
+                  {trackingSteps.map((step, index) => {
+                    const done = currentStatusIndex >= index;
+                    const active = currentStatusIndex === index;
+                    const Icon = step.icon;
 
-                <h3 className="mt-1 text-sm font-bold text-stone-900">
-                  Your Items
-                </h3>
+                    return (
+                      <div
+                        key={step.status}
+                        className="relative flex flex-col items-center text-center"
+                      >
+                        <div
+                          className={`z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 transition ${
+                            done
+                              ? "border-stone-900 bg-stone-900 text-white"
+                              : "border-stone-200 bg-white text-stone-400"
+                          }`}
+                        >
+                          <Icon size={16} />
+                        </div>
+
+                        <h3
+                          className={`mt-4 text-xs font-semibold ${
+                            done ? "text-stone-900" : "text-stone-400"
+                          }`}
+                        >
+                          {step.label}
+                        </h3>
+
+                        <p className="mt-2 max-w-[130px] text-[10px] leading-relaxed text-stone-400">
+                          {step.description}
+                        </p>
+
+                        {active && (
+                          <span className="mt-3 text-[8px] font-bold uppercase tracking-widest text-emerald-700">
+                            Current Stage
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                </div>
               </div>
 
-              <span className="rounded-full bg-stone-900 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-white">
-                {sellerOrder.orderStatus}
+              {/* Mobile Timeline */}
+              <div className="space-y-6 sm:hidden">
+                {trackingSteps.map((step, index) => {
+                  const done = currentStatusIndex >= index;
+                  const active = currentStatusIndex === index;
+                  const Icon = step.icon;
+
+                  return (
+                    <div
+                      key={step.status}
+                      className="flex gap-4"
+                    >
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${
+                            done
+                              ? "border-stone-900 bg-stone-900 text-white"
+                              : "border-stone-200 bg-white text-stone-400"
+                          }`}
+                        >
+                          <Icon size={15} />
+                        </div>
+
+                        {index !== 3 && (
+                          <div
+                            className={`mt-2 h-8 w-[2px] ${
+                              currentStatusIndex > index
+                                ? "bg-stone-900"
+                                : "bg-stone-200"
+                            }`}
+                          />
+                        )}
+                      </div>
+
+                      <div className="pt-1">
+                        <h3
+                          className={`text-sm font-semibold ${
+                            done ? "text-stone-900" : "text-stone-400"
+                          }`}
+                        >
+                          {step.label}
+                        </h3>
+
+                        <p className="mt-1 text-xs text-stone-400">
+                          {step.description}
+                        </p>
+
+                        {active && (
+                          <span className="mt-2 inline-block text-[9px] font-bold uppercase tracking-widest text-emerald-700">
+                            Current Stage
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {isPending && (
+                <p className="mt-6 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+                  Your order is awaiting confirmation.
+                </p>
+              )}
+
+            </div>
+          )}
+        </section>
+
+        {/* Products + Price Summary */}
+        <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1.5fr_0.8fr]">
+
+          {/* Products */}
+          <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-7">
+
+            <div className="flex items-center justify-between border-b border-stone-100 pb-5">
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-stone-400">
+                  Your Purchase
+                </p>
+
+                <h2 className="mt-2 text-xl font-semibold">
+                  Order Items
+                </h2>
+              </div>
+
+              <span className="text-xs text-stone-500">
+                {order.orderItems?.length || 0} items
               </span>
             </div>
 
-            {/* Seller Products */}
-            <div className="mt-4 space-y-3">
-              {sellerOrder.items?.map((item, itemIndex) => (
+            <div className="divide-y divide-stone-100">
+              {order.orderItems?.map((item, index) => (
                 <div
-                  key={item._id || itemIndex}
-                  className="flex items-center gap-3 border-b border-stone-200 pb-3 last:border-0 last:pb-0"
+                  key={item._id || index}
+                  className="flex gap-4 py-5 first:pt-5 last:pb-0"
                 >
                   <img
                     src={
@@ -385,250 +559,238 @@ const OrderSuccess = () => {
                       "/placeholder-image.jpg"
                     }
                     alt={item.title}
-                    className="h-16 w-14 rounded-lg object-cover bg-stone-200"
+                    className="h-24 w-20 rounded-lg bg-stone-100 object-cover"
                   />
 
-                  <div className="min-w-0 flex-1">
-                    <h4 className="truncate text-xs font-bold text-stone-900">
+                  <div className="flex min-w-0 flex-1 flex-col justify-center">
+                    <h3 className="text-sm font-semibold text-stone-900">
                       {item.title}
-                    </h4>
+                    </h3>
 
-                    <p className="mt-1 text-[10px] text-stone-500">
+                    <p className="mt-2 text-xs text-stone-500">
                       Quantity: {item.quantity}
                     </p>
 
-                    <p className="mt-1 text-xs font-semibold text-stone-800">
-                      {fmt(
-                        item.price?.amount,
-                        item.price?.currency
-                      )}
+                    <p className="mt-3 text-sm font-semibold">
+                      {formatPrice(item.price)}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Cancelled Status */}
-            {sellerOrder.orderStatus === "cancelled" ? (
-              <div className="mt-4 rounded-lg border border-red-100 bg-red-50 p-3">
-                <p className="text-xs font-semibold text-red-700">
-                  This seller's order has been cancelled.
-                </p>
-              </div>
-            ) : (
-              /* Tracking Steps */
-              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {steps.map((step, stepIndex) => {
-                  const done = currentIndex >= stepIndex;
-                  const active = currentIndex === stepIndex;
-
-                  return (
-                    <div
-                      key={step.status}
-                      className={`rounded-lg border p-3 ${
-                        done
-                          ? "border-stone-900 bg-stone-900 text-white"
-                          : "border-stone-200 bg-white text-stone-400"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-[9px]">
-                          0{stepIndex + 1}
-                        </span>
-
-                        {done && (
-                          <span className="text-emerald-400">
-                            ✓
-                          </span>
-                        )}
-                      </div>
-
-                      <h4 className="mt-2 text-[11px] font-bold">
-                        {step.label}
-                      </h4>
-
-                      <p className="mt-1 text-[9px] leading-relaxed text-stone-400">
-                        {step.sub}
-                      </p>
-
-                      {active && (
-                        <p className="mt-2 text-[8px] font-bold uppercase tracking-wider text-emerald-400">
-                          Current Stage
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
-        );
-      })}
-    </div>
-  ) : (
-    <p className="rounded-xl border border-stone-200 bg-[#faf9f7] p-4 text-xs text-stone-500">
-      No seller-wise tracking information available.
-    </p>
-  )}
-  </div>
 
-            {/* Divider */}
-            <div className="my-6 border-t border-dashed border-stone-200" />
+          {/* Price Summary */}
+          <div className="h-fit rounded-2xl border border-stone-200 bg-white p-5 sm:p-7">
 
-            {/* Shipping & Support */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-stone-400">
+              Payment Summary
+            </p>
 
-              {/* Shipping Address */}
-              <div className="rounded-xl border border-stone-200 bg-[#faf9f7] p-4 sm:p-5">
-                <div className="flex items-center justify-between">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                    Delivering To
-                  </p>
+            <h2 className="mt-2 text-xl font-semibold">
+              Order Total
+            </h2>
 
-                  <svg className="h-5 w-5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M12 21s8-4.5 8-11a8 8 0 10-16 0c0 6.5 8 11 8 11z" />
-                    <circle cx="12" cy="10" r="2.5" strokeWidth={1.6} />
-                  </svg>
-                </div>
+            <div className="mt-7 flex items-center justify-between border-b border-stone-100 pb-4">
+              <span className="text-xs text-stone-500">
+                Total Products
+              </span>
 
-                <h3 className="mt-3 text-base font-bold text-stone-900">
-                  {order.shippingAddress?.fullName}
-                </h3>
-
-                <div className="mt-2 space-y-1 text-xs leading-relaxed text-stone-500">
-                  <p>{order.shippingAddress?.addressLine}</p>
-
-                  {order.shippingAddress?.landmark && (
-                    <p>{order.shippingAddress.landmark}</p>
-                  )}
-
-                  <p>
-                    {order.shippingAddress?.city},{" "}
-                    {order.shippingAddress?.state} -{" "}
-                    {order.shippingAddress?.pincode}
-                  </p>
-
-                  <p>{order.shippingAddress?.phone}</p>
-                  <p>{order.shippingAddress?.email}</p>
-                </div>
-
-                <span className="mt-3 inline-block rounded-full border border-stone-200 bg-white px-3 py-1 text-[9px] font-semibold uppercase tracking-wider text-stone-500">
-                  {order.shippingAddress?.addressType || "Address"}
-                </span>
-              </div>
-
-              {/* Customer Support */}
-              <div className="flex flex-col justify-between rounded-xl bg-[#171717] p-4 text-white sm:p-5">
-                <div>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                    We're Here For You
-                  </p>
-
-                  <h3 className="mt-3 text-lg font-semibold tracking-tight">
-                    Need a hand?
-                  </h3>
-
-                  <p className="mt-2 text-xs leading-relaxed text-stone-400">
-                    Have questions about your order or delivery?
-                    Our support team is here to help.
-                  </p>
-                </div>
-
-                <div className="mt-5 border-t border-white/10 pt-3">
-                  <p className="text-xs font-semibold text-white">
-                    care@snitch.co.in
-                  </p>
-
-                  <p className="mt-1 text-[9px] uppercase tracking-widest text-stone-500">
-                    Customer Support
-                  </p>
-                </div>
-              </div>
-
+              <span className="text-xs font-semibold">
+                {order.orderItems?.reduce(
+                  (total, item) => total + Number(item.quantity || 0),
+                  0
+                ) || 0}
+              </span>
             </div>
 
-            {/* Bottom Actions */}
-            <div className="mt-6 flex flex-col gap-3 border-t border-stone-200 pt-5 sm:flex-row sm:items-center sm:justify-between print:hidden">
+            <div className="flex items-center justify-between border-b border-stone-100 py-4">
+              <span className="text-xs text-stone-500">
+                Payment Method
+              </span>
 
-              <Link
-                to="/"
-                className="flex h-10 items-center justify-center gap-3 rounded-xl bg-[#171717] px-8 text-[10px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-stone-700 active:scale-[0.98]"
-              >
-                Continue Shopping
+              <span className="text-xs font-semibold">
+                Razorpay
+              </span>
+            </div>
 
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M5 12h14m-6-6l6 6-6 6" />
-                </svg>
-              </Link>
+            <div className="flex items-center justify-between pt-5">
+              <span className="text-sm font-semibold">
+                Grand Total
+              </span>
 
-              <button
-                onClick={handlePrint}
-                className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500 transition hover:text-stone-900"
-              >
-                Print Order Receipt
-              </button>
+              <span className="text-xl font-bold tracking-tight">
+                {formatPrice(order.price)}
+              </span>
+            </div>
 
+            <div className="mt-5 flex items-center gap-2 rounded-lg bg-emerald-50 p-3">
+              <CheckCircle2 size={15} className="text-emerald-700" />
+
+              <span className="text-[10px] font-semibold text-emerald-800">
+                {order.status === "paid"
+                  ? "Payment verified successfully"
+                  : `Payment ${order.status}`}
+              </span>
             </div>
 
           </div>
+        </section>
+
+        {/* Delivery Address */}
+        <section className="mt-6 rounded-2xl border border-stone-200 bg-white p-5 sm:p-7">
+
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100">
+              <MapPin size={18} />
+            </div>
+
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-stone-400">
+                Delivery Information
+              </p>
+
+              <h2 className="mt-1 text-lg font-semibold">
+                Shipping Address
+              </h2>
+            </div>
+          </div>
+
+          <div className="mt-6 border-t border-stone-100 pt-5">
+            <h3 className="text-sm font-semibold">
+              {order.shippingAddress?.fullName}
+            </h3>
+
+            <div className="mt-2 space-y-1 text-xs leading-relaxed text-stone-500">
+              <p>{order.shippingAddress?.addressLine}</p>
+
+              {order.shippingAddress?.landmark && (
+                <p>{order.shippingAddress.landmark}</p>
+              )}
+
+              <p>
+                {order.shippingAddress?.city},{" "}
+                {order.shippingAddress?.state} -{" "}
+                {order.shippingAddress?.pincode}
+              </p>
+
+              <p>{order.shippingAddress?.phone}</p>
+
+              <p>{order.shippingAddress?.email}</p>
+            </div>
+          </div>
+
+        </section>
+
+        {/* Support */}
+        <section className="mt-6 flex flex-col gap-4 rounded-2xl bg-[#171717] p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-7">
+
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+              <Headphones size={19} />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold">
+                Need assistance?
+              </h3>
+
+              <p className="mt-1 text-xs text-stone-400">
+                We're here to help with your order.
+              </p>
+
+              <p className="mt-3 text-xs font-semibold">
+                care@snitch.co.in
+              </p>
+            </div>
+          </div>
+
+          <span className="text-[9px] uppercase tracking-[0.2em] text-stone-500">
+            SNITCH Customer Care
+          </span>
+
+        </section>
+
+        {/* Bottom Actions */}
+        <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
+
+          <button
+            onClick={handlePrint}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-stone-700 transition hover:bg-white"
+          >
+            <Printer size={14} />
+            Print Receipt
+          </button>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/my-orders"
+              className="inline-flex items-center justify-center rounded-xl border border-stone-300 px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition hover:bg-white"
+            >
+              My Orders
+            </Link>
+
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center gap-3 rounded-xl bg-stone-900 px-7 py-3 text-[10px] font-bold uppercase tracking-widest text-white transition hover:bg-stone-700"
+            >
+              Continue Shopping
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+
         </div>
 
         {/* Recommendations */}
         {recommendations.length > 0 && (
-          <section className="mt-16 sm:mt-20 print:hidden">
+          <section className="mt-16 print:hidden">
 
-            <div className="mb-8 flex items-end justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.28em] font-semibold text-stone-400 mb-1">
-                  CURATED LOOKBOOK
-                </p>
+            <div className="mb-7">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.3em] text-stone-400">
+                Discover More
+              </p>
 
-                <h3 className="text-2xl font-bold text-stone-900 tracking-tight">
-                  You Might Also Admire
-                </h3>
-              </div>
-
-              <Link
-                to="/"
-                className="text-xs font-semibold text-stone-800 hover:text-stone-950 underline underline-offset-4 tracking-wider uppercase"
-              >
-                Explore Full Archive →
-              </Link>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                Complete Your Look
+              </h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {recommendations.map((prod) => {
-                const img =
-                  prod.images?.[0]?.url || '/placeholder-image.jpg';
-
-                return (
-                  <div
-                    key={prod._id}
-                    onClick={() => navigate(`/product/${prod._id}`)}
-                    className="group relative flex flex-col rounded-2xl border border-[#e5ddd3] bg-white p-3 hover:border-[#c9b8a5] hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
-                  >
-                    <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#f2efec] mb-3">
-                      <img
-                        src={img}
-                        alt={prod.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                    </div>
-
-                    <h4 className="font-bold text-sm text-[#171717] line-clamp-1 group-hover:text-stone-600 transition-colors">
-                      {prod.title}
-                    </h4>
-
-                    <p className="text-xs font-bold text-stone-900 mt-1">
-                      {fmt(prod.price?.amount, prod.price?.currency)}
-                    </p>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5">
+              {recommendations.map((product) => (
+                <button
+                  key={product._id}
+                  onClick={() =>
+                    navigate(`/product/${product._id}`)
+                  }
+                  className="group text-left"
+                >
+                  <div className="aspect-[3/4] overflow-hidden rounded-xl bg-stone-200">
+                    <img
+                      src={
+                        product.images?.[0]?.url ||
+                        "/placeholder-image.jpg"
+                      }
+                      alt={product.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    />
                   </div>
-                );
-              })}
+
+                  <h3 className="mt-3 truncate text-xs font-semibold text-stone-900">
+                    {product.title}
+                  </h3>
+
+                  <p className="mt-1 text-xs text-stone-600">
+                    {formatPrice(product.price)}
+                  </p>
+                </button>
+              ))}
             </div>
+
           </section>
         )}
+
       </main>
     </div>
   );

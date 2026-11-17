@@ -133,19 +133,9 @@ const Nav = () => {
                   <>
                     {/* Logged In */}
                     <div className="border-b border-[#e5ddd3] px-5 py-4">
-                      <p className="text-xs text-[#82776d]">
-                        Welcome back
-                      </p>
-
                       <h3 className="mt-1 truncate text-sm font-bold">
                         {user.fullName || user.name || user.email || "User"}
                       </h3>
-
-                      {user.email && (
-                        <p className="mt-1 truncate text-xs text-[#82776d]">
-                          {user.email}
-                        </p>
-                      )}
                     </div>
 
                     {/* Track Order */}

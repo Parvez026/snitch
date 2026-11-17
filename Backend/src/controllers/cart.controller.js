@@ -417,8 +417,8 @@ export const getOrderDetailsController = async (req, res) => {
 
     const order = await paymentModel.findOne({
       "razorpay.orderId": orderId,
-      user: userId,
-    });
+        user: userId,
+      }).select("-sellerOrders");
 
     if (!order) {
       return res.status(404).json({
@@ -444,13 +444,11 @@ export const getOrderDetailsController = async (req, res) => {
 
 export const getMyOrdersController = async (req, res) => {
     const userId = req.user._id;
-
+  
     const orders = await paymentModel
-      .find({
-        user: userId,
-        status: "paid",
-      })
-      .sort({ createdAt: -1 });
+    .find({ user: userId })
+     .select("-sellerOrders")
+     .sort({ createdAt: -1 });
 
     return res.status(200).json({
       message: "Orders fetched successfully",
@@ -505,7 +503,6 @@ export const getSellerOrdersController = async (req, res) => {
 };
 
 
-
 export const updateSellerOrderStatusController = async (req, res) => {
   try {
     const sellerId = req.user._id;
@@ -540,6 +537,7 @@ export const updateSellerOrderStatusController = async (req, res) => {
       });
     }
 
+    // Find this seller's order
     const sellerOrder = order.sellerOrders.find(
       (item) => item.seller.toString() === sellerId.toString()
     );
@@ -551,7 +549,37 @@ export const updateSellerOrderStatusController = async (req, res) => {
       });
     }
 
+    // Update seller's individual status
     sellerOrder.orderStatus = orderStatus;
+
+    // Calculate one common status for the buyer
+    const statuses = order.sellerOrders.map(
+      (item) => item.orderStatus
+    );
+
+    if (statuses.every((status) => status === "cancelled")) {
+      order.orderStatus = "cancelled";
+    } else {
+      const activeStatuses = statuses.filter(
+        (status) => status !== "cancelled"
+      );
+
+      const statusPriority = {
+        confirmed: 1,
+        processing: 2,
+        shipped: 3,
+        delivered: 4,
+      };
+
+      // Buyer sees the least advanced status
+      order.orderStatus = activeStatuses.reduce(
+        (currentStatus, status) =>
+          statusPriority[status] < statusPriority[currentStatus]
+            ? status
+            : currentStatus,
+        activeStatuses[0]
+      );
+    }
 
     await order.save();
 
@@ -559,6 +587,7 @@ export const updateSellerOrderStatusController = async (req, res) => {
       message: "Order status updated successfully",
       success: true,
       orderStatus: sellerOrder.orderStatus,
+      buyerOrderStatus: order.orderStatus,
     });
 
   } catch (error) {
@@ -570,6 +599,7 @@ export const updateSellerOrderStatusController = async (req, res) => {
     });
   }
 };
+
 
 
 
