@@ -5,10 +5,16 @@ import {
   ChevronRight,
   Heart,
 } from "lucide-react";
+import { useSelector } from "react-redux";
+import useWishlist from "../../wishlist/hooks/useWishlist.js";
 
 const ProductCard = ({ product, navigate }) => {
   const [activeImage, setActiveImage] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  const wishlistItems = useSelector((state) => state.wishlist.wishlistItems)
+  const {handleAddToWishlist,handleRemoveFromWishlist}= useWishlist();
+  const isWishlisted = wishlistItems.some((item) => item._id === product?._id);
+
 
   const images = Array.isArray(product?.images)
     ? product.images.filter((image) => image?.url)
@@ -26,6 +32,18 @@ const ProductCard = ({ product, navigate }) => {
     setActiveImage(
       (prev) => (prev + direction + images.length) % images.length
     );
+  };
+
+  const handleWishlistToggle = async () => {
+  try {
+    if (isWishlisted) {
+      await handleRemoveFromWishlist(product._id);
+    } else {
+      await handleAddToWishlist(product._id);
+    }
+  } catch (error) {
+    console.error("Wishlist update failed:", error);
+   }
   };
 
   const formatPrice = () => {
@@ -69,8 +87,7 @@ const ProductCard = ({ product, navigate }) => {
         {/* Wishlist */}
         <button
           type="button"
-          onClick={() => setIsWishlisted((prev) => !prev)}
-          aria-label="Toggle wishlist"
+          onClick={handleWishlistToggle}
           aria-pressed={isWishlisted}
           className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-sm transition hover:scale-110"
         >

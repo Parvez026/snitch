@@ -15,6 +15,7 @@ import Checkout from "../features/cart/pages/Checkout";
 import AppLayout from "./AppLayout";
 import About from "../features/shared/components/About";
 import MyOrders from "../features/cart/pages/MyOrders";
+import Wishlist from "../features/wishlist/pages/wishlist";
 
 export const Router = createBrowserRouter([
 
@@ -60,6 +61,10 @@ export const Router = createBrowserRouter([
   {
     path:"/address",
     element:<Protected><Address/></Protected>
+  },
+  {
+   path:"/wishlist",
+   element:<Protected><Wishlist/></Protected>
   },
   {
     path:"/seller",

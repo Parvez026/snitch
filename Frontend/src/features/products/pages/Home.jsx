@@ -5,7 +5,8 @@ import { useSelector } from "react-redux";
 import {Search,ShoppingBag,SlidersHorizontal,X,ChevronDown,RotateCcw,ArrowUpDown} from "lucide-react";
 import { useNavigate } from "react-router";
 import ProductCard from "../components/ProductCard.jsx";
-
+import { useSearchParams } from "react-router";
+import useWishlist from "../../wishlist/hooks/useWishlist.js";
 const categories = [
   "All",
   "Shirts",
@@ -18,9 +19,9 @@ const categories = [
 
 const Home = () => {
   const { handleGetAllProducts } = useProduct();
-  const navigate = useNavigate();
-
+  const { handleGetWishlist } = useWishlist();
   const products = useSelector((state) => state.product.products);
+  const navigate = useNavigate();
 
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,30 +30,41 @@ const Home = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
+  const [searchParams, setSearchParams] = useSearchParams();
 
+ useEffect(() => {
+  const query = searchParams.get("search") || "";
+   if (!query) return;
+   setSearchQuery(query);
+   setSearchParams((params) => {
+      params.delete("search");
+      return params;
+    }, { replace: true });
+   }, [searchParams, setSearchParams]);
+
+  //FETCH ALL PRODUCTS
+  useEffect(() => {
     const fetchProducts = async () => {
       try {
         await handleGetAllProducts();
       } catch (error) {
         console.error("Product fetch error:", error);
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
     };
-
     fetchProducts();
-
-    return () => {
-      mounted = false;
-    };
   }, []);
+ 
+  useEffect(() => {
+  handleGetWishlist();
+}, []);
+
+
 
   const safeProducts = Array.isArray(products) ? products : [];
 
-  const getProductPrice = (product) =>
-    Number(product.price?.amount ?? 0);
+  const getProductPrice = (product) => Number(product.price?.amount ?? 0);
 
   const filteredProducts = useMemo(() => {
     let result = [...safeProducts];
@@ -132,12 +144,6 @@ const Home = () => {
     setMaxPrice("");
   };
 
-  const handleAddToCart = (product) => {
-    if (product?._id) {
-      navigate(`/product/${product._id}`);
-    }
-  };
-
   return (
     <main className="min-h-screen bg-[#faf9f6] text-[#171717]">
       <section
@@ -168,7 +174,6 @@ const Home = () => {
               strokeWidth={1.7}
               className="shrink-0 text-gray-400 transition-colors group-focus-within:text-[#a18e6d]"
             />
-
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -323,7 +328,6 @@ const Home = () => {
 
       {/* Footer */}
       <div className="mt-4 flex items-center justify-between border-t border-[#f0ede8] pt-3">
-
         <button
           type="button"
           onClick={() => setShowFilters(false)}
@@ -333,9 +337,9 @@ const Home = () => {
         </button>
       </div>
 
-    </div>
-  </div>
-</div>
+       </div>
+     </div>
+      </div>
 
         {/* Active Filters */}
         {hasActiveFilters && (
@@ -405,7 +409,6 @@ const Home = () => {
                 key={product._id}
                 product={product}
                 navigate={navigate}
-                onAddToCart={handleAddToCart}
               />
             ))}
           </div>

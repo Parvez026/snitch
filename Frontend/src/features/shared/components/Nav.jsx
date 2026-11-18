@@ -9,6 +9,7 @@ import {
   LogIn,
   LogOut,
   MapPin,
+  Heart,
 } from "lucide-react";
 
 import { Link, useNavigate } from "react-router";
@@ -24,6 +25,9 @@ const Nav = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   const getInitials = (fullName) => {
     if (!fullName) return "";
@@ -54,6 +58,19 @@ const Nav = () => {
     }
   };
 
+  const handleSearchSubmit = (e) => {
+  e.preventDefault();
+
+  const query = searchText.trim();
+
+  if (!query) return;
+
+  setIsSearchOpen(false);
+  setIsProfileOpen(false);
+  setIsMenuOpen(false);
+
+  navigate(`/?search=${encodeURIComponent(query)}#products`);
+ };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#101010] text-white">
@@ -90,9 +107,55 @@ const Nav = () => {
         <div className="flex items-center gap-4 md:gap-6">
 
           {/* Search */}
-          <button aria-label="Search">
-            <Search size={21} />
-          </button>
+     {/* Search */}
+{isSearchOpen ? (
+  <form
+    onSubmit={handleSearchSubmit}
+    className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2"
+  >
+    <input
+      type="text"
+      autoFocus
+      value={searchText}
+      onChange={(e) => setSearchText(e.target.value)}
+      placeholder="Search products..."
+      className="w-28 bg-transparent text-xs text-white outline-none placeholder:text-gray-400 sm:w-40"
+    />
+
+    <button type="submit" aria-label="Submit search">
+      <Search size={17} />
+    </button>
+
+    <button
+      type="button"
+      aria-label="Close search"
+      onClick={() => {
+        setIsSearchOpen(false);
+        setSearchText("");
+      }}
+    >
+      <X size={17} />
+    </button>
+  </form>
+) : (
+  <button
+    aria-label="Open search"
+    onClick={() => {
+      setIsSearchOpen(true);
+      setIsMenuOpen(false);
+    }}
+  >
+    <Search size={21} />
+  </button>
+  )}
+
+   {/* Wishlist */}
+    <button
+    onClick={() => navigate("/wishlist")}
+    className="transition hover:text-gray-300"
+    >
+     <Heart size={21} />
+    </button>
 
           {/* Cart */}
           <button
