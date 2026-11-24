@@ -11,7 +11,13 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20"
 import { config } from "./config/config.js";
 
+import path from "path";
+import { fileURLToPath } from "url";
+
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(morgan("dev"));
 app.use(express.json());
@@ -40,7 +46,7 @@ passport.use(new GoogleStrategy({
     return done(null, profile);
 }))
 
-app.get("/", (_req, res) => {
+app.get("/health", (_req, res) => {
     res.status(200).json({ message: "Server is running" });
 });
 
@@ -49,5 +55,20 @@ app.use("/api/products", productRouter);
 app.use("/api/cart",cartRouter)
 app.use("/api/address",addressRouter)
 app.use("/api/wishlist",wishlistRouter)
+
+
+const frontendPath = path.resolve(__dirname, "../../Frontend/dist");
+
+app.use(express.static(frontendPath));
+
+app.get("/{*splat}", (req, res, next) => {
+    if (req.path.startsWith("/api/")) {
+        return next();
+    }
+
+    res.sendFile(path.join(frontendPath, "index.html"), (err) => {
+        if (err) next(err);
+    });
+});
 
 export default app;
