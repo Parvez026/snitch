@@ -16,6 +16,8 @@ import AppLayout from "./AppLayout";
 import About from "../features/shared/components/About";
 import MyOrders from "../features/cart/pages/MyOrders";
 import Wishlist from "../features/wishlist/pages/wishlist";
+import Shop from "../features/products/pages/Shop";
+import Contact from "../features/shared/components/Contact";
 
 export const Router = createBrowserRouter([
 
@@ -35,8 +37,16 @@ export const Router = createBrowserRouter([
     element:<Home/>
   },
   {
+   path:"/shop",
+   element:<Shop/>
+  },
+  {
      path: "/about",
      element:<About/>
+  },
+  {
+    path:"/contact",
+    element:<Contact/>
   },
   {
     path:"/product/:productId",

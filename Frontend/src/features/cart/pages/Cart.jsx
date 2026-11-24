@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { useCart } from '../hooks/useCart';
 import { useNavigate, Link } from 'react-router';
 import { useRazorpay} from "react-razorpay";
+import CartRecommendations from "../components/CartRecommendations";
 
 // Currency formatter
 const sym = {INR: '₹',USD: '$',EUR: '€',GBP: '£',};
@@ -732,8 +733,10 @@ const totalItems = items.reduce((acc, item) => acc + (item.quantity || 0),0);
             onCheckout={() => navigate('/checkout')}
             />
           </div>
+          
         )}
       </div>
+      <CartRecommendations cartItems={items} />
     </div>
   );
 };

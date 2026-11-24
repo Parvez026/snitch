@@ -12,7 +12,7 @@ import {
   Heart,
 } from "lucide-react";
 
-import { Link, useNavigate } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import { useAuth } from "../../auth/hooks/useAuth.js";
 
@@ -69,7 +69,7 @@ const Nav = () => {
   setIsProfileOpen(false);
   setIsMenuOpen(false);
 
-  navigate(`/?search=${encodeURIComponent(query)}#products`);
+  navigate(`/shop?search=${encodeURIComponent(query)}#products`);
  };
 
   return (
@@ -84,35 +84,59 @@ const Nav = () => {
           SNITCH
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden items-center gap-9 text-sm text-gray-300 md:flex">
-          <Link to="/" className="text-white">
-            Home
-          </Link>
+    {/* Desktop Navigation */}
+   <div className="hidden items-center gap-9 text-sm text-gray-300 md:flex">
+    <NavLink
+    to="/"
+     end
+     className={({ isActive }) =>
+      isActive ? "text-white" : "transition hover:text-white"
+     }
+     >
+    Home
+  </NavLink>
 
-          <a href="#products" className="transition hover:text-white">
-            Shop
-          </a>
+  <NavLink
+    to="/shop"
+    className={({ isActive }) =>
+      isActive ? "text-white" : "transition hover:text-white"
+    }
+  >
+    Shop
+  </NavLink>
+  {user?.role === "seller" && (
+  <NavLink
+    to="/seller/dashboard"
+    className={({ isActive }) =>
+      isActive ? "text-white" : "transition hover:text-white"
+    }
+  >
+    Dashboard
+  </NavLink>
+)}
 
-          <Link to="/about" className="transition hover:text-white">
-            About
-          </Link>
+  <NavLink
+    to="/about"
+    className={({ isActive }) =>
+      isActive ? "text-white" : "transition hover:text-white"
+    }
+  >
+    About
+  </NavLink>
 
-          <a href="#contact" className="transition hover:text-white">
-            Contact
-          </a>
-        </div>
+  <NavLink to="/contact" className="transition hover:text-white">
+    Contact
+  </NavLink>
+</div>
 
         {/* Actions */}
         <div className="flex items-center gap-4 md:gap-6">
-
-          {/* Search */}
-     {/* Search */}
-{isSearchOpen ? (
-  <form
-    onSubmit={handleSearchSubmit}
-    className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2"
-  >
+      {/* Search */}
+     {isSearchOpen ? (
+    <form
+     onSubmit={handleSearchSubmit}
+     className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2"
+     >
     <input
       type="text"
       autoFocus
@@ -287,17 +311,22 @@ const Nav = () => {
             Home
           </Link>
 
-          <a href="#products" onClick={() => setIsMenuOpen(false)}>
+          <Link to="/shop" onClick={() => setIsMenuOpen(false)}>
             Shop
-          </a>
+          </Link>
+          {user?.role === "seller" && (
+          <Link to="/seller/dashboard" onClick={() => setIsMenuOpen(false)}>
+          Dashboard
+         </Link>
+             )}
 
           <Link to="/about" onClick={() => setIsMenuOpen(false)}>
             About
           </Link>
 
-          <a href="#contact" onClick={() => setIsMenuOpen(false)}>
+          <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
             Contact
-          </a>
+          </Link>
         </div>
       )}
     </nav>
