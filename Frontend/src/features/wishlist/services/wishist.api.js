@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const wishlistApi=axios.create({
-    baseURL:"/api/wishlist",
+    baseURL:`${import.meta.env.VITE_API_URL||""}/api/wishlist`,
     withCredentials:true
 })
 

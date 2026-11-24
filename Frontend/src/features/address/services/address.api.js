@@ -1,9 +1,9 @@
 import axios from "axios";
 
-const addressApi=axios.create({
-    baseURL:"/api/address",
-    withCredentials:true
-})
+const addressApi = axios.create({
+  baseURL: `${import.meta.env.VITE_API_URL || ""}/api/address`,
+  withCredentials: true
+});
 
 
 export const createAddressApi=async(formData)=>{
